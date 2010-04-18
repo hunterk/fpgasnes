@@ -315,6 +315,8 @@ architecture PPU_PixelFetch of PPU_PixelFetch is
 	
 	signal adrX			: STD_LOGIC_VECTOR(8 downto 0);
 	
+	signal BSel			: STD_LOGIC_VECTOR(3 downto 0);
+	
 	constant C_BANK		: STD_LOGIC := '0';
 	constant B_BANK		: STD_LOGIC := '1';
 begin
@@ -343,7 +345,7 @@ begin
 			end if;
 		end if;
 	end process;
-		
+
 	--
 	-- Step 1 : Ask Address computation unit to get the adress.
 	--
@@ -1033,6 +1035,28 @@ begin
 		end case;
 	end process;
 	
+	process(R2105_BGMode)
+	begin
+		case R2105_BGMode is
+		when CONSTANTS.MODE0 =>
+			BSel <= "0000";			-- TODO.
+		when CONSTANTS.MODE1 =>
+			BSel <= "0100";			-- DONE.
+		when CONSTANTS.MODE2 =>
+			BSel <= "0000";			-- TODO.
+		when CONSTANTS.MODE3 =>
+			BSel <= "0000";			-- TODO.
+		when CONSTANTS.MODE4 =>
+			BSel <= "0000";			-- TODO.
+		when CONSTANTS.MODE5 =>
+			BSel <= "0000";			-- TODO.
+		when CONSTANTS.MODE6 =>
+			BSel <= "0000";			-- TODO.
+		when others =>
+			BSel <= "0000";			-- Who cares.
+		end case;
+	end process;
+		
 	--
 	-- Select the correct offset register, base adress tile, base adress char.
 	--
@@ -1060,8 +1084,8 @@ begin
 			selectX1,
 			selectX2,
 			selectX3,
-			selectX4
-			
+			selectX4,
+			BSel
 			)
 	begin
 		---
@@ -1072,55 +1096,110 @@ begin
 			BG1BPP23 <= regBG1_BPP23C;
 			BG1BPP45 <= regBG1_BPP45C;
 			BG1BPP67 <= regBG1_BPP67C;
-			BG1TILEFLIPH <= regBG1_TileDFlipH;
-			BG1TILEPRIO  <= regBG1_TileDPrio;
-			BG1TILEPAL   <= regBG1_TileDPal;
+			if (BSel(0) = '0') then
+				BG1TILEFLIPH <= regBG1_TileCFlipH;
+				BG1TILEPRIO  <= regBG1_TileCPrio;
+				BG1TILEPAL   <= regBG1_TileCPal;
+			else
+				BG1TILEFLIPH <= regBG1_TileDFlipH;
+				BG1TILEPRIO  <= regBG1_TileDPrio;
+				BG1TILEPAL   <= regBG1_TileDPal;
+			end if;
 		else
 			BG1BPP01 <= regBG1_BPP01B;
 			BG1BPP23 <= regBG1_BPP23B;
 			BG1BPP45 <= regBG1_BPP45B;
 			BG1BPP67 <= regBG1_BPP67B;
-			BG1TILEFLIPH <= regBG1_TileCFlipH;
-			BG1TILEPRIO  <= regBG1_TileCPrio;
-			BG1TILEPAL   <= regBG1_TileCPal;
+			if (BSel(0) = '0') then
+				BG1TILEFLIPH <= regBG1_TileBFlipH;
+				BG1TILEPRIO  <= regBG1_TileBPrio;
+				BG1TILEPAL   <= regBG1_TileBPal;
+			else
+				BG1TILEFLIPH <= regBG1_TileCFlipH;
+				BG1TILEPRIO  <= regBG1_TileCPrio;
+				BG1TILEPAL   <= regBG1_TileCPal;
+			end if;
 		end if;
 
 		if (selectX2 = C_BANK) then
 			BG2BPP01 <= regBG2_BPP01C;
 			BG2BPP23 <= regBG2_BPP23C;
-			BG2TILEFLIPH <= regBG2_TileDFlipH;
-			BG2TILEPRIO  <= regBG2_TileDPrio;
-			BG2TILEPAL   <= regBG2_TileDPal;
-		else           
-			BG2BPP01 <= regBG2_BPP01B;
-			BG2BPP23 <= regBG2_BPP23B;
 			BG2TILEFLIPH <= regBG2_TileCFlipH;
 			BG2TILEPRIO  <= regBG2_TileCPrio;
 			BG2TILEPAL   <= regBG2_TileCPal;
+			if (BSel(1) = '0') then
+				BG2TILEFLIPH <= regBG2_TileCFlipH;
+				BG2TILEPRIO  <= regBG2_TileCPrio;
+				BG2TILEPAL   <= regBG2_TileCPal;
+			else
+				BG2TILEFLIPH <= regBG2_TileDFlipH;
+				BG2TILEPRIO  <= regBG2_TileDPrio;
+				BG2TILEPAL   <= regBG2_TileDPal;
+			end if;
+		else           
+			BG2BPP01 <= regBG2_BPP01B;
+			BG2BPP23 <= regBG2_BPP23B;
+			if (BSel(1) = '0') then
+				BG2TILEFLIPH <= regBG2_TileBFlipH;
+				BG2TILEPRIO  <= regBG2_TileBPrio;
+				BG2TILEPAL   <= regBG2_TileBPal;
+			else
+				BG2TILEFLIPH <= regBG2_TileCFlipH;
+				BG2TILEPRIO  <= regBG2_TileCPrio;
+				BG2TILEPAL   <= regBG2_TileCPal;
+			end if;
 		end if;
 		
 		if (selectX3 = C_BANK) then
 			BG3BPP01 <= regBG3_BPP01C;
 			BG3TILEFLIPH <= regBG3_TileDFlipH;
-			BG3TILEPRIO  <= regBG3_TileDPrio;
-			BG3TILEPAL   <= regBG3_TileDPal;
+			if (BSel(2) = '0') then
+				BG3TILEFLIPH <= regBG3_TileCFlipH;
+				BG3TILEPRIO  <= regBG3_TileCPrio;
+				BG3TILEPAL   <= regBG3_TileCPal;
+			else
+				BG3TILEFLIPH <= regBG3_TileDFlipH;
+				BG3TILEPRIO  <= regBG3_TileDPrio;
+				BG3TILEPAL   <= regBG3_TileDPal;
+			end if;
 		else
 			BG3BPP01 <= regBG3_BPP01B;
 			BG3TILEFLIPH <= regBG3_TileCFlipH;
-			BG3TILEPRIO  <= regBG3_TileCPrio;
-			BG3TILEPAL   <= regBG3_TileCPal;
+			if (BSel(2) = '0') then
+				BG3TILEFLIPH <= regBG3_TileBFlipH;
+				BG3TILEPRIO  <= regBG3_TileBPrio;
+				BG3TILEPAL   <= regBG3_TileBPal;
+			else
+				BG3TILEFLIPH <= regBG3_TileCFlipH;
+				BG3TILEPRIO  <= regBG3_TileCPrio;
+				BG3TILEPAL   <= regBG3_TileCPal;
+			end if;
 		end if;
 
 		if (selectX4 = C_BANK) then
 			BG4BPP01 <= regBG4_BPP01C;
 			BG4TILEFLIPH <= regBG4_TileDFlipH;
-			BG4TILEPRIO  <= regBG4_TileDPrio;
-			BG4TILEPAL   <= regBG4_TileDPal;
+			if (BSel(3) = '0') then
+				BG4TILEFLIPH <= regBG4_TileCFlipH;
+				BG4TILEPRIO  <= regBG4_TileCPrio;
+				BG4TILEPAL   <= regBG4_TileCPal;
+			else
+				BG4TILEFLIPH <= regBG4_TileDFlipH;
+				BG4TILEPRIO  <= regBG4_TileDPrio;
+				BG4TILEPAL   <= regBG4_TileDPal;
+			end if;
 		else           
 			BG4BPP01 <= regBG4_BPP01B;
 			BG4TILEFLIPH <= regBG4_TileCFlipH;
-			BG4TILEPRIO  <= regBG4_TileCPrio;
-			BG4TILEPAL   <= regBG4_TileCPal;
+			if (BSel(3) = '0') then
+				BG4TILEFLIPH <= regBG4_TileBFlipH;
+				BG4TILEPRIO  <= regBG4_TileBPrio;
+				BG4TILEPAL   <= regBG4_TileBPal;
+			else
+				BG4TILEFLIPH <= regBG4_TileCFlipH;
+				BG4TILEPRIO  <= regBG4_TileCPrio;
+				BG4TILEPAL   <= regBG4_TileCPal;
+			end if;
 		end if;
 --		---
 --		--- Stage 1 : Select left or right data.

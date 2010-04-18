@@ -48,7 +48,12 @@ package CONSTANTS is
 	constant BG4_SEL		: STD_LOGIC_VECTOR := "100";
 	constant BACKDROP_SEL	: STD_LOGIC_VECTOR := "111";
 	
-	constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1E6"; -- X + Offset = 0 when X = 17 (512-17)
+	-- 24 pix shift.
+	-- constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1E6"; -- X + Offset = 0 when X = 17 (512-17)
+	
+	-- 16 pix shift.
+	constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1EE";
+	
 	constant OFFSETXMODE7_TO0	: STD_LOGIC_VECTOR := x"1FE"; -- X + Offset = 0 when X = 2
 end CONSTANTS;
 
