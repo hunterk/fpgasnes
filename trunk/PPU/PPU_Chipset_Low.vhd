@@ -313,22 +313,29 @@ begin
 	--
 	-- Directly use main output.
 	--
-	
---	MainIndex <= "0" & sBG2Palette & sBG2Index(3 downto 0);
---  BG2
---	MainIndex	<= '0' & DataPixels(9 downto 7) & DataPixels(19 downto 16);
---	Red			<= MainColor(4 downto 0);
---	Green		<= MainColor(9 downto 5);
---	Blue		<= MainColor(14 downto 10);
+--	Red			<= sMainColor(4 downto 0);
+--	Green		<= sMainColor(9 downto 5);
+--	Blue		<= sMainColor(14 downto 10);
 
--- BG3
---	MainIndex	<= "000" & sBG3Palette & sBG3Index(1 downto 0);
-	MainIndex	<= "000" & DataPixels(12 downto 10) & DataPixels(21 downto 20); -- BG3
---	MainIndex	<= "0" & DataPixels(9 downto 7) & DataPixels(19 downto 16); -- BG2
---	MainIndex	<= "0" & DataPixels(6 downto 4) & DataPixels(25 downto 22); -- BG1
+	process(DataPixels)
+	begin
+		if (DataPixels(21 downto 20) /= "00") then
+			MainIndex	<= "000" & DataPixels(12 downto 10) & DataPixels(21 downto 20); -- BG3
+		else
+			if (DataPixels(25 downto 22) /= "0000") then
+				MainIndex	<= "0" & DataPixels(6 downto 4) & DataPixels(25 downto 22); -- BG1
+			else
+				MainIndex	<= "0" & DataPixels(9 downto 7) & DataPixels(19 downto 16); -- BG2
+			end if;
+		end if;
+	end process;
+	
 	Red			<= MainColor(4 downto 0);
 	Green		<= MainColor(9 downto 5);
 	Blue		<= MainColor(14 downto 10);
+
+-- BG3
+--	MainIndex	<= "000" & sBG3Palette & sBG3Index(1 downto 0);
 --	Red			<= DataPixels(25 downto 22) & '0';
 --	Green		<= DataPixels(25 downto 22) & '0';
 --	Blue		<= DataPixels(25 downto 22) & '0';
@@ -406,9 +413,9 @@ begin
 	-- TODO : Sprite Complete unit : x -> OBJ Pixel / Prio / Valid
 	--
 	
---	--
---	-- Main Unit
---	--
+	--
+	-- Main Unit
+	--
 --	instanceMain : PPU_MainSub port map
 --	( 	
 --		clock				=> clock,
@@ -452,10 +459,10 @@ begin
 --		RGB					=> sMainColor,
 --		selectOut			=> selectMain
 --	);
---
---	--
---	-- Sub Unit
---	--
+
+	--
+	-- Sub Unit
+	--
 --	instanceSub : PPU_MainSub port map
 --	(
 --		clock				=> clock,
@@ -499,7 +506,7 @@ begin
 --		RGB					=> sSubColor,
 --		selectOut			=> selectSub
 --	);
---
+
 --	--
 --	-- Window Color Management.
 --	--

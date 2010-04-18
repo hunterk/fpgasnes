@@ -235,14 +235,14 @@ begin
 		case R2105_BGMode is
 		when CONSTANTS.MODE0 =>
 			case stateCounter is
-			when "000"  => command <= BG3_TILE;
-			when "001"  => command <= BG1_TILE;
+			when "000"  => command <= BG1_TILE;
+			when "001"  => command <= BG3_TILE;
 			when "010"  => command <= BG2_TILE;
 			when "011"  => command <= BG4_TILE;
-			when "100"  => command <= BG1_BPP01;
+			when "100"  => command <= BG4_BPP01;
 			when "101"  => command <= BG2_BPP01;
 			when "110"  => command <= BG3_BPP01;
-			when others => command <= BG4_BPP01;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP2; -- 2 BPP
 			bg2Selector	<= BPP2; -- 2 BPP
@@ -253,10 +253,10 @@ begin
 			when "001"  => command <= BG1_TILE;
 			when "010"  => command <= BG2_TILE;
 			when "011"  => command <= BG1_BPP23;
-			when "100"  => command <= BG1_BPP01;
+			when "100"  => command <= BG3_BPP01;
 			when "101"  => command <= BG2_BPP01;
 			when "110"  => command <= BG2_BPP23;
-			when others => command <= BG3_BPP01;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP4; -- 4 BPP
 			bg2Selector	<= BPP4; -- 4 BPP
@@ -268,9 +268,9 @@ begin
 			when "010"  => command <= BG1_TILE;
 			when "011"  => command <= BG2_TILE;
 			when "100"  => command <= BG1_BPP23;
-			when "101"  => command <= BG1_BPP01;
+			when "101"  => command <= BG2_BPP23;
 			when "110"  => command <= BG2_BPP01;
-			when others => command <= BG2_BPP23;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP4; -- 4 BPP
 			bg2Selector	<= BPP4; -- 4 BPP
@@ -281,10 +281,10 @@ begin
 			when "001"  => command <= BG2_TILE;
 			when "010"  => command <= BG1_BPP45;
 			when "011"  => command <= BG1_BPP23;
-			when "100"  => command <= BG1_BPP01;
+			when "100"  => command <= BG1_BPP67;
 			when "101"  => command <= BG2_BPP01;
 			when "110"  => command <= BG2_BPP23;
-			when others => command <= BG1_BPP67;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP8; -- 8 BPP
 			bg2Selector	<= BPP4; -- 4 BPP
@@ -296,9 +296,9 @@ begin
 			when "010"  => command <= BG2_TILE;
 			when "011"  => command <= BG1_BPP45;
 			when "100"  => command <= BG1_BPP23;
-			when "101"  => command <= BG1_BPP01;
+			when "101"  => command <= BG1_BPP67;
 			when "110"  => command <= BG2_BPP01;
-			when others => command <= BG1_BPP67;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP8; -- 8 BPP
 			bg2Selector	<= BPP2; -- 2 BPP
@@ -309,10 +309,10 @@ begin
 			when "001"  => command <= BG1_TILE;
 			when "010"  => command <= BG2_BPP01;
 			when "011"  => command <= BG1_BPP23;
-			when "100"  => command <= BG1_BPP01;
+			when "100"  => command <= NONE;
 			when "101"  => command <= NONE;
 			when "110"  => command <= NONE;
-			when others => command <= NONE;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP4; -- 4 BPP
 			bg2Selector	<= BPP2; -- 2 BPP
@@ -323,10 +323,10 @@ begin
 			when "001"  => command <= BG3_TILEOFF8;
 			when "010"  => command <= BG1_TILE;	-- Need 2 Cycle between the READ AND that BPP can read tile info.
 			when "011"  => command <= NONE;
-			when "100"  => command <= BG1_BPP01;
+			when "100"  => command <= NONE;
 			when "101"  => command <= BG1_BPP23;
 			when "110"  => command <= NONE;
-			when others => command <= NONE;
+			when others => command <= BG1_BPP01;	-- Always LAST
 			end case;
 			bg1Selector	<= BPP4; -- 4 BPP
 			bg2Selector	<= BPP2; -- 2 BPP
