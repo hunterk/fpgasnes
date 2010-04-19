@@ -16,15 +16,15 @@ package CONSTREG is
 	constant R05_BG3Priority		: STD_LOGIC := '1';
 	constant R05_BGMode			: STD_LOGIC_VECTOR := "001";
 
-	constant R06_MosaicSize		: STD_LOGIC_VECTOR := "0000";
-	constant R06_BGMosaicEnable	: STD_LOGIC_VECTOR := "0011";
+	constant R06_MosaicSize		: STD_LOGIC_VECTOR := "0011";
+	constant R06_BGMosaicEnable	: STD_LOGIC_VECTOR := "0100";
 
 	constant R07_BG1AddrTileMap	: STD_LOGIC_VECTOR := "001000";
 	constant R08_BG2AddrTileMap	: STD_LOGIC_VECTOR := "001100";
 	constant R09_BG3AddrTileMap	: STD_LOGIC_VECTOR := "010100";
 	constant R0A_BG4AddrTileMap	: STD_LOGIC_VECTOR := "000000";
-	constant R0789A_BGsMapSX		: STD_LOGIC_VECTOR := "0000";
-	constant R0789A_BGsMapSY		: STD_LOGIC_VECTOR := "0000";
+	constant R0789A_BGsMapSX		: STD_LOGIC_VECTOR := "0111";
+	constant R0789A_BGsMapSY		: STD_LOGIC_VECTOR := "0111";
 
 	constant R0B_BG1PixAddr		: STD_LOGIC_VECTOR := "000";
 	constant R0B_BG2PixAddr		: STD_LOGIC_VECTOR := "000";
@@ -32,12 +32,12 @@ package CONSTREG is
 	constant R0C_BG4PixAddr		: STD_LOGIC_VECTOR := "000";
 
 	constant R0D_M7_HOFS			: STD_LOGIC_VECTOR := "0000000000000";
-	constant R0D_BG1_HOFS			: STD_LOGIC_VECTOR := "0000000000";
+	constant R0D_BG1_HOFS			: STD_LOGIC_VECTOR := "0000000111";
 	constant R0E_M7_VOFS			: STD_LOGIC_VECTOR := "0000000000000";
-	constant R0E_BG1_VOFS			: STD_LOGIC_VECTOR := "0000000000";
-	constant R0F_BG2_HOFS			: STD_LOGIC_VECTOR := "0000000000";
-	constant R10_BG2_VOFS			: STD_LOGIC_VECTOR := "0000000000";
-	constant R11_BG3_HOFS			: STD_LOGIC_VECTOR := "0000000000";
+	constant R0E_BG1_VOFS			: STD_LOGIC_VECTOR := "0011000000";
+	constant R0F_BG2_HOFS			: STD_LOGIC_VECTOR := "0000000010";
+	constant R10_BG2_VOFS			: STD_LOGIC_VECTOR := "0011000000";
+	constant R11_BG3_HOFS			: STD_LOGIC_VECTOR := "0000000011";
 	constant R12_BG3_VOFS			: STD_LOGIC_VECTOR := "0000000000";
 	constant R13_BG4_HOFS			: STD_LOGIC_VECTOR := "0000000000";
 	constant R14_BG4_VOFS			: STD_LOGIC_VECTOR := "0000000000";

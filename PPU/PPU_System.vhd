@@ -52,10 +52,14 @@ architecture ArchiPPU_System of PPU_System is
 	component PPU_MosaicCompute is
 	Port (
 		clock				: in STD_LOGIC;
-		X					: in STD_LOGIC_VECTOR(7 downto 0);
+		X					: in STD_LOGIC_VECTOR(8 downto 0);
 		Y					: in STD_LOGIC_VECTOR(8 downto 0);
+		R2106_MosaicSize	: in STD_LOGIC_VECTOR(3 downto 0);
+		R2106_Reset			: in STD_LOGIC;
 		
 		XMosaicSig			: out STD_LOGIC;
+		XNormal				: out STD_LOGIC_VECTOR(8 downto 0);
+		YNormal				: out STD_LOGIC_VECTOR(8 downto 0);
 		YMosaic				: out STD_LOGIC_VECTOR(8 downto 0)
 	);
 	end component;
@@ -523,6 +527,7 @@ architecture ArchiPPU_System of PPU_System is
                                         
 	signal R2106_MosaicSize				: STD_LOGIC_VECTOR (3 downto 0);
 	signal R2106_BGMosaicEnable			: STD_LOGIC_VECTOR (3 downto 0);
+	signal R2106_Reset					: STD_LOGIC;
 		                                
 	signal R2107_BG1AddrTileMap			: STD_LOGIC_VECTOR (5 downto 0);
 	signal R2108_BG2AddrTileMap			: STD_LOGIC_VECTOR (5 downto 0);
@@ -600,10 +605,8 @@ architecture ArchiPPU_System of PPU_System is
 	signal todoR2133_SCR_INTERLACE		: STD_LOGIC;
 
 	signal sMode7x,sMode7y				: STD_LOGIC_VECTOR(20 downto 0);
-	signal rX							: STD_LOGIC_VECTOR(8 downto 0);
-	
+	signal NormalX, NormalY				: STD_LOGIC_VECTOR(8 downto 0);
 begin
-	rX <= X(8 downto 0);
 	
 	--
 	-- CPU Side / Register setup.
@@ -746,10 +749,14 @@ begin
 	instanceMosaic : PPU_MosaicCompute port map
 	(
 		clock					=> clock,
-		X						=> rX(7 downto 0),
+		X						=> X,
 		Y						=> Y,
 		
+		R2106_MosaicSize		=> R2106_MosaicSize,
+		R2106_Reset				=> R2106_Reset,
 		XMosaicSig				=> XMosaicSig,
+		XNormal					=> NormalX,
+		YNormal					=> NormalY,
 		YMosaic					=> YMosaic
 	);
 	
@@ -798,7 +805,7 @@ begin
 	--
 	-- Arbitration during one frame.
 	--
-	process(clock,rX,Y,visibleX,visibleY,R2133_OVERSCAN,
+	process(clock,visibleX,visibleY,R2133_OVERSCAN,
 			sVRAMReadAdrPairFromFetch,
 			sVRAMReadAdrImpairFromFetch,
 			sVRAMWriteLowHightFromRegisters,
@@ -818,13 +825,13 @@ begin
 		--
 		-- Find the region.
 		--
-		if (rX>=0 and rX<=255) then
+		if (NormalX>=0 and NormalX<=255) then
 			visibleX <= '1';
 		else
 			visibleX <= '0';
 		end if;
 		
-		if (Y>=0) and ((Y<=447 and R2133_OVERSCAN='0') or (Y<=479 and R2133_OVERSCAN='1')) then
+		if (NormalY>=0) and ((NormalY<=447 and R2133_OVERSCAN='0') or (NormalY<=479 and R2133_OVERSCAN='1')) then
 			visibleY <= '1';
 		else
 			visibleY <= '0';
@@ -899,7 +906,7 @@ begin
 		readOnlyAdrCGRAM 		<= sPaletteMainReadAdr;
 		
 		-- Last X Pixel of line AND with valid Y range.
-		if (rX >= 256) then
+		if (NormalX >= 256) then
 			startline <= '1';
 		else
 			startline <= '0';
@@ -918,7 +925,7 @@ begin
 		clock         		=> clock,
 		
 		lineStart			=> startline,
-		X_NonMosaic			=> rX(7 downto 0),
+		X_NonMosaic			=> NormalX(7 downto 0),
 		YMosaic				=> YMosaic(8 downto 1),
 		
 		R210D_M7_HOFS		=> R210D_M7_HOFS,
@@ -945,8 +952,8 @@ begin
 		startLine				=> startline,
 
 		ScreenY_PostMosaic		=> YMosaic,
-		ScreenX_NonMosaic		=> rX,
-		ScreenY_NonMosaic		=> Y,
+		ScreenX_NonMosaic		=> NormalX,
+		ScreenY_NonMosaic		=> NormalY,
 		MosaicXSig				=> XMosaicSig,
 		
 		Mode7X					=> sMode7x,
@@ -1028,7 +1035,7 @@ begin
 		drawPixel				=> drawPixel,
 
 		-- TODO : move to 9..0 when support HiRes + Sprite. : need to find outside of screen and support pixel precision.
-		xCoord					=> rX(7 downto 0),
+		xCoord					=> NormalX(7 downto 0),
 		
 		--
 		-- Memory Line Cache Side.

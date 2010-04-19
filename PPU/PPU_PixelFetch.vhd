@@ -1263,36 +1263,36 @@ begin
 				BG3Pix,
 				BG4Pix)
 	begin
---		if (clock'event and clock = '1') then
+		if (clock'event and clock = '1') then
 --case ScreenY_NonMosaic(6 downto 5) is
 --when "00" =>
 --
 -- Normal BG Stuff.
 --
 
---			if (MosaicXSig = '1' or R2106_BGMosaicEnable(3)='0') then
+			if (MosaicXSig = '1' or R2106_BGMosaicEnable(3)='0') then
 				regBG4Pix			<= BG4Pix;
 				regPalPrioBlock(3)	<= palPrioBlock(3); -- Prio BG 4.
 				regPalPrioBlock(15 downto 13)	<= palPrioBlock(15 downto 13); -- Pag BG 4.
---			end if;
+			end if;
 			
---			if (MosaicXSig = '1' or R2106_BGMosaicEnable(2)='0') then
+			if (MosaicXSig = '1' or R2106_BGMosaicEnable(2)='0') then
 				regBG3Pix			<= BG3Pix;
 				regPalPrioBlock(2)	<= palPrioBlock(2); -- Prio BG 3.
 				regPalPrioBlock(12 downto 10)	<= palPrioBlock(12 downto 10); -- Pal BG 3.
---			end if;
+			end if;
 			
---			if (MosaicXSig = '1' or R2106_BGMosaicEnable(1)='0') then
+			if (MosaicXSig = '1' or R2106_BGMosaicEnable(1)='0') then
 				regBG2Pix			<= BG2Pix;
 				regPalPrioBlock(1)	<= palPrioBlock(1); -- Prio BG 2.
 				regPalPrioBlock(9 downto 7)	<= palPrioBlock(9 downto 7); -- Pal BG 2.
---			end if;
+			end if;
 
---			if (MosaicXSig = '1' or R2106_BGMosaicEnable(0)='0') then
+			if (MosaicXSig = '1' or R2106_BGMosaicEnable(0)='0') then
 				regBG1Pix			<= BG1Pix;
 				regPalPrioBlock(0)	<= palPrioBlock(0); -- Prio BG 1.
 				regPalPrioBlock(6 downto 4)	<= palPrioBlock(6 downto 4); -- Pal BG 1.
---			end if;
+			end if;
 --when "01" =>
 --
 -- State Counter.
@@ -1324,7 +1324,7 @@ begin
 --regPalPrioBlock(15 downto 0)	<= "0000000000000000";
 --end case;
 --
---		end if;
+		end if;
 	end process;
 	
 	process(	ScreenX_NonMosaic,
