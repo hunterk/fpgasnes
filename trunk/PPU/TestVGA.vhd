@@ -29,44 +29,24 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity TestVGA is
     Port ( clock : in  STD_LOGIC;
-			write : in STD_LOGIC;
-			R : out  STD_LOGIC_VECTOR (7 downto 0);
-			G : out  STD_LOGIC_VECTOR (7 downto 0);
-			B : out  STD_LOGIC_VECTOR (7 downto 0);
-			HSync : out  STD_LOGIC;
-			VSync : out  STD_LOGIC;
-			CSync : out  STD_LOGIC;
-			DE : out  STD_LOGIC
-			);
+           clockVGA : out  STD_LOGIC;
+           R : out  STD_LOGIC_VECTOR (7 downto 0);
+           G : out  STD_LOGIC_VECTOR (7 downto 0);
+           B : out  STD_LOGIC_VECTOR (7 downto 0);
+           HSync : out  STD_LOGIC;
+           VSync : out  STD_LOGIC;
+           CSync : out  STD_LOGIC;
+           DE : out  STD_LOGIC);
 end TestVGA;
 
 architecture Behavioral of TestVGA is
-    signal intHSync : std_logic := '0';
-    signal intVSync : std_logic := '0';
-    signal intX     : std_logic_vector(9 downto 0)  := "0000000000";
-    signal intY     : std_logic_vector(9 downto 0)  := "0000000000";
-    signal clockdiv : std_logic_vector(2 downto 0)  := "000";
-	 signal showPixel : std_logic := '0';
-	 signal frame		: std_logic_vector(1 downto 0) := "00";
-
-	signal Adr : STD_LOGIC_VECTOR(7 downto 0);
-	signal Value : STD_LOGIC_VECTOR(7 downto 0);
-	signal DataReady : STD_LOGIC;
-
-	signal cpuAddress	: STD_LOGIC_VECTOR(5 downto 0);
-	signal CPUwrite		: STD_LOGIC;
-	signal DataIn		: STD_LOGIC_VECTOR(7 downto 0);
-	signal DataOut		: STD_LOGIC_VECTOR(7 downto 0);
-	
-	
 	component PPU_System is
 		Port (
 			clock				: in STD_LOGIC;
 			reset				: in STD_LOGIC;
 			
-			X					: in STD_LOGIC_VECTOR(9 downto 0);
+			X					: in STD_LOGIC_VECTOR(8 downto 0);
 			Y					: in STD_LOGIC_VECTOR(8 downto 0);
-			ValidPixel			: in STD_LOGIC;
 			
 			-- ##############################################################
 			--   CPU Side.
@@ -84,13 +64,27 @@ architecture Behavioral of TestVGA is
 			Blue				: out STD_LOGIC_VECTOR(4 downto 0)
 		);
 	end component;
-
-	signal regR,regG,regB : STD_LOGIC_VECTOR(4 downto 0);
-	signal clockSnes, clockVGA : STD_LOGIC;
+	
+    signal intHSync : std_logic := '0';
+    signal intVSync : std_logic := '0';
+    signal intX     : std_logic_vector(9 downto 0)  := "0000000000";
+    signal intY     : std_logic_vector(9 downto 0)  := "0000000000";
+    signal clockdiv : std_logic_vector(2 downto 0)  := "000";
+	 signal showPixel : std_logic := '0';
+	signal frame		: std_logic_vector(1 downto 0) := "00";
+	
+	signal clockSnes : STD_LOGIC;
+	signal CPUwrite : STD_LOGIC;
 	signal reset : STD_LOGIC;
 	signal validPix : STD_LOGIC;
-begin
 	
+	signal cpuAddress : STD_LOGIC_VECTOR(5 downto 0);
+	signal DataIn, DataOut : STD_LOGIC_VECTOR(7 downto 0);
+	
+	signal regR,regG,regB : STD_LOGIC_VECTOR(4 downto 0);
+	signal XSnes : STD_LOGIC_VECTOR(9 downto 0);
+	signal YSnes : STD_LOGIC_VECTOR(9 downto 0);
+begin
 	process(clock)
 	begin
       if (clock'event) and (clock='1') then
@@ -98,103 +92,122 @@ begin
 		end if;
 	end process;
 
+	clockVGA <= clockdiv(1);
 	clockSnes	<= clockdiv(2);
-	clockVGA	<= clockdiv(1);
+	XSnes	<= intX + 850;
+	YSnes	<= intY + 980;
 	
-	cpuAddress	<= intX(5 downto 0);
-	CPUwrite	<= write;
-	DataIn		<= intY(7 downto 0);
-	
-	-- Use cloc div 2 here.
-	process(clockVGA,intX, intY)
+	-- Use cloc div 4 here.
+	process(clockdiv(1),intX, intY)
 	begin
-		-- First STAGE : Clocked X and Y. every 2 clock tick.
+		-- First STAGE : Clocked X and Y. every 4 clock tick.
 		--
-		if (clockVGA'event) and (clockVGA='1') then
+		if (clockdiv(1)'event) and (clockdiv(1)='1') then
 			-- Trick : Y increment take one clock cycle, so we do it on 799. X and Y are on the same clock.
 	      if (intX >= 799) then -- 799x4
 	         intX <= "0000000000"; -- 10 Bit Counter.
-			 intY <= intY + 1;
-			if (intY >= 524) then -- and intX>=799 written upper. : correct test, dont wait 0,525.
-				intY <= "0000000000";
-				frame <= frame + 1;
---				reset <= '1';
-			else
---				reset <= '0';				
-			end if;
+			 	intY <= intY + 1;
+				if (intY >= 524) then -- and intX>=799 written upper. : correct test, dont wait 0,525.
+					intY <= "0000000000";
+					frame <= frame + 1;
+				end if;
 	      else
-			intX <= intX + 1;
---			reset <= '0';
+	         intX <= intX + 1;
 	      end if;
 	   end if;
+		
+		--
+      if (intX >= 0) and (intX <= 96) then
+         intHSync <= '0';
+      else
+         intHSync <= '1';
+      end if;
+
+      if (intY < 2) then
+         intVSync <= '0';
+      else
+         intVSync <= '1';
+      end if;	 
+
+	 if (intY = 900) then
+		CPUwrite	<= '0';
+	 else
+		CPUwrite	<= '1';
+	 end if;
 
 		-- Show pixel.
---      if (intX >= 144) and (intX < (144+480) ) then -- Show pixel.
---			if (intY>=(31+2)) and (intY<(31+2+480)) then
---      		showPixel <= '1';
---			else
---				showPixel <= '0';
---			end if;
---	   else
---         showPixel <= '0';
---      end if;
+      if (intX >= 144) and (intX < 700 ) then -- Show pixel.
+			if ((intY>=0) and (intY<480)) then
+				showPixel <= '1';
+			else
+				showPixel <= '0';
+			end if;
+	   else
+         showPixel <= '0';
+      end if;
 	end process;
 	
-	validPix <= '1';
-
-	process(intX)
-	begin
---		if (intX >= 0) and (intX <= 96) then
-		if (intX >= 659) and (intX <= 755) then
-			intHSync <= '0';
-		else
-			intHSync <= '1';
-		end if;
-	end process;
+	--- 24 Bit
+--	R <= intX(8 downto 1);
+--	G <= intY(8 downto 1);
+--	B <= intX(8 downto 1);
+	cpuAddress <= intX(5 downto 0);
+	DataIn <= intY(7 downto 0);
+	reset <= '0';
 	
-	process(intY)
-	begin
-		if (intY >= 493) and (intY <= 494) then
---		if (intY < 2) then
-			intVSync <= '0';
-		else
-			intVSync <= '1';
-		end if;	 
-	end process;
+	instanceSystem : PPU_System port map
+	(
+		clock			=> clockSnes,
+		reset			=> reset,
 		
---	instanceSystem : PPU_System port map
---	(
---		clock			=> clockSnes,
---		reset			=> reset,
---		
---		X				=> intX(9 downto 0),
---		Y				=> intY(8 downto 0),
---		ValidPixel		=> validPix,
---		
---		-- ##############################################################
---		--   CPU Side.
---		-- ##############################################################
---		Address 		=> cpuAddress,
---		CPUwrite		=> CPUwrite,
---		DataIn	  	=> DataIn,
---		DataOut	  	=> DataOut,
---
---		-- ##############################################################
---		--   Video output Side.
---		-- ##############################################################
---		Red			=> regR,
---		Green			=> regG,
---		Blue			=> regB
---	);
+		X				=> XSnes(9 downto 1),
+		Y				=> YSnes(9 downto 1),
+		
+		-- ##############################################################
+		--   CPU Side.
+		-- ##############################################################
+		Address 		=> cpuAddress,
+		CPUwrite		=> CPUwrite,
+		DataIn	  	=> DataIn,
+		DataOut	  	=> DataOut,
+
+		-- ##############################################################
+		--   Video output Side.
+		-- ##############################################################
+		Red			=> regR,
+		Green		=> regG,
+		Blue		=> regB
+	);
 
 	-- 5 Bit --> 8 Bit
-	R <= intX(7 downto 0); --regR & regR(2 downto 0);
-	G <= intX(7 downto 0); --regG & regG(2 downto 0);
-	B <= intY(7 downto 0); --regB & regB(2 downto 0);
+	process(XSnes)
+	begin
+		if (XSnes >= 0) and (XSnes <= 511) then
+			R <= regR & regR(4 downto 2);
+			G <= regG & regG(4 downto 2);
+			B <= regB & regB(4 downto 2);
+		else
+			if (showPixel = '1') then
+				if (XSnes >= 512) then
+					R <= "00000000";
+					G <= "10000000";
+					B <= "00000000";
+				else
+					R <= "10000000";
+					G <= "00000000";
+					B <= "00000000";
+				end if;
+			else
+				R <= "00000000";
+				G <= "00000000";
+				B <= "00000000";
+			end if;
+		end if;
+	end process;
 
-	HSync	<= intHSync;
-	VSync	<= intVSync;
-	CSync	<= '0'; -- 1 When encoding sync on the green channel.
-	DE		<= '1';
+	HSync <= intHSync;
+	VSync <= intVSync;
+	CSync <= '0';
+	DE <= '1';
 end Behavioral;
 
