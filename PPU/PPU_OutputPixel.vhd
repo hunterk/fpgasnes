@@ -85,7 +85,8 @@ architecture PPU_OutputPixel of PPU_OutputPixel is
 	signal pixSub,pixMain,pixSub2	: STD_LOGIC_VECTOR(14 downto 0);
 	signal halve					: STD_LOGIC;
 	signal colorMathROut, colorMathGOut, colorMathBOut : STD_LOGIC_VECTOR(4 downto 0);
-	
+		
+	signal trace					: STD_LOGIC_VECTOR(4 downto 0);
 begin
 	process(addSubScreen_2130, fixedColorR, fixedColorG, fixedColorB, subSelect, subColor, mainColor,
 			winColMainInside, winColSubInside, pixSub, bgSub, pixMain)
@@ -93,19 +94,24 @@ begin
 		if (addSubScreen_2130 = '0') then
 			bgSub	<= CONSTANTS.BACKDROP_SEL;
 			pixSub	<= fixedColorB & fixedColorG & fixedColorR;
+			trace(0)	<= '0';
 		else
 			bgSub	<= subSelect;
 			pixSub	<= subColor;
+			trace(0)	<= '1';
 		end if;
 		
 		if (winColMainInside = '0') then
 			if (winColSubInside = '0') then
 				pixSub2 <= "000000000000000";
+				trace(2 downto 1)	<= "00";
 			else
 				pixSub2 <= pixSub;
+				trace(2 downto 1)	<= "01";
 			end if;
 			pixMain <= "000000000000000";
 		else
+			trace(2 downto 1)	<= "11";
 			pixMain <= mainColor;
 			pixSub2 <= pixSub;
 		end if;
@@ -116,11 +122,14 @@ begin
 		if (half_2130='1' and winColMainInside = '1') then
 			if (addSubScreen_2130='1' and bgSub = CONSTANTS.BACKDROP_SEL) then
 				halve <= '0';
+				trace(4 downto 3)	<= "00";
 			else
 				halve <= '1';
+				trace(4 downto 3)	<= "01";
 			end if;
 		else
 			halve <= '0';
+			trace(4 downto 3)	<= "10";
 		end if;
 	end process;
 

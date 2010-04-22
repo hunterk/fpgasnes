@@ -313,26 +313,32 @@ begin
 	--
 	-- Directly use main output.
 	--
---	Red			<= sMainColor(4 downto 0);
---	Green		<= sMainColor(9 downto 5);
---	Blue		<= sMainColor(14 downto 10);
 
-	process(DataPixels)
-	begin
-		if (DataPixels(21 downto 20) /= "00") then
-			MainIndex	<= "000" & DataPixels(12 downto 10) & DataPixels(21 downto 20); -- BG3
-		else
-			if (DataPixels(25 downto 22) /= "0000") then
-				MainIndex	<= "0" & DataPixels(6 downto 4) & DataPixels(25 downto 22); -- BG1
-			else
-				MainIndex	<= "0" & DataPixels(9 downto 7) & DataPixels(19 downto 16); -- BG2
-			end if;
-		end if;
-	end process;
+--	process(DataPixels)
+--	begin
+----		if (DataPixels(21 downto 20) /= "00") then
+----			MainIndex	<= "000" & DataPixels(12 downto 10) & DataPixels(21 downto 20); -- BG3
+----		else
+----			if (DataPixels(25 downto 22) /= "0000") then
+----				MainIndex	<= "0" & DataPixels(6 downto 4) & DataPixels(25 downto 22); -- BG1
+----			else
+----				MainIndex	<= "0" & DataPixels(9 downto 7) & DataPixels(19 downto 16); -- BG2
+----			end if;
+----		end if;
+--		if (xCoord(7) = '0') then
+--			Red			<= sMainColor(4 downto 0);
+--			Green		<= sMainColor(9 downto 5);
+--			Blue		<= sMainColor(14 downto 10);
+--		else
+--			Red			<= sSubColor(4 downto 0);
+--			Green		<= sSubColor(9 downto 5);
+--			Blue		<= sSubColor(14 downto 10);
+--		end if;
+--	end process;
 	
-	Red			<= MainColor(4 downto 0);
-	Green		<= MainColor(9 downto 5);
-	Blue		<= MainColor(14 downto 10);
+--	Red			<= MainColor(4 downto 0);
+--	Green		<= MainColor(9 downto 5);
+--	Blue		<= MainColor(14 downto 10);
 
 -- BG3
 --	MainIndex	<= "000" & sBG3Palette & sBG3Index(1 downto 0);
@@ -416,119 +422,121 @@ begin
 	--
 	-- Main Unit
 	--
---	instanceMain : PPU_MainSub port map
---	( 	
---		clock				=> clock,
---		R2105_BGMode 		=> R2105_BGMode,
---		R2105_BG3Priority	=> R2105_BG3Priority,
---		Enable_BG			=> R212C_MAIN,
---		Enable_Win			=> R212E_WMASK_MAIN,
---		
---		R2130_DIRECTCOLOR	=> R2130_DIRECTCOLOR,
---		
---		BG1Index			=> sBG1Index,
---		BG2Index			=> sBG2Index,
---		BG3Index			=> sBG3Index,
---		BG4Index			=> sBG4Index,
---		
---		BG1Palette			=> sBG1Palette,
---		BG2Palette			=> sBG2Palette,
---		BG3Palette			=> sBG3Palette,
---		BG4Palette			=> sBG4Palette,
---
---		BGPriority			=> sBGPriority,
---		
---		OBJIndex			=> sObjIndex,
---		OBJPalette			=> sObjPalette,
---		OBJPriority			=> sObjPriority,
---		
---		R21232425_W1_ENABLE	=> R21232425_W1_ENABLE,
---		R21232425_W2_ENABLE	=> R21232425_W2_ENABLE,
---		R21232425_W1_INV	=> R21232425_W1_INV,
---		R21232425_W2_INV	=> R21232425_W2_INV,
---					
---		R212AB_WMASK_LSB	=> R212AB_WMASK_LSB,
---		R212AB_WMASK_MSB	=> R212AB_WMASK_MSB,
---					
---		W1_Inside			=> regInsideW1,
---		W2_Inside			=> regInsideW2,
---		
---		PaletteIndex		=> MainIndex, -- out
---		ColorIn				=> MainColor,
---		
---		RGB					=> sMainColor,
---		selectOut			=> selectMain
---	);
+	instanceMain : PPU_MainSub port map
+	( 	
+		clock				=> clock,
+		R2105_BGMode 		=> R2105_BGMode,
+		R2105_BG3Priority	=> R2105_BG3Priority,
+		Enable_BG			=> R212C_MAIN,
+		Enable_Win			=> R212E_WMASK_MAIN,
+		
+		R2130_DIRECTCOLOR	=> R2130_DIRECTCOLOR,
+		
+		BG1Index			=> sBG1Index,
+		BG2Index			=> sBG2Index,
+		BG3Index			=> sBG3Index,
+		BG4Index			=> sBG4Index,
+		
+		BG1Palette			=> sBG1Palette,
+		BG2Palette			=> sBG2Palette,
+		BG3Palette			=> sBG3Palette,
+		BG4Palette			=> sBG4Palette,
+
+		BGPriority			=> sBGPriority,
+		
+		OBJIndex			=> sObjIndex,
+		OBJPalette			=> sObjPalette,
+		OBJPriority			=> sObjPriority,
+		
+		R21232425_W1_ENABLE	=> R21232425_W1_ENABLE,
+		R21232425_W2_ENABLE	=> R21232425_W2_ENABLE,
+		R21232425_W1_INV	=> R21232425_W1_INV,
+		R21232425_W2_INV	=> R21232425_W2_INV,
+					
+		R212AB_WMASK_LSB	=> R212AB_WMASK_LSB,
+		R212AB_WMASK_MSB	=> R212AB_WMASK_MSB,
+					
+		W1_Inside			=> regInsideW1,
+		W2_Inside			=> regInsideW2,
+		
+		PaletteIndex		=> MainIndex, -- out
+		ColorIn				=> MainColor,
+		
+		RGB					=> sMainColor,
+		selectOut			=> selectMain
+	);
 
 	--
 	-- Sub Unit
 	--
---	instanceSub : PPU_MainSub port map
---	(
---		clock				=> clock,
---		R2105_BGMode 		=> R2105_BGMode,
---		R2105_BG3Priority	=> R2105_BG3Priority,
---		Enable_BG			=> R212D_SUB,
---		Enable_Win			=> R212F_WMASK_SUB,
---		
---		R2130_DIRECTCOLOR	=> R2130_DIRECTCOLOR,
---		
---		BG1Index			=> sBG1Index,
---		BG2Index			=> sBG2Index,
---		BG3Index			=> sBG3Index,
---		BG4Index			=> sBG4Index,
---		
---		BG1Palette			=> sBG1Palette,
---		BG2Palette			=> sBG2Palette,
---		BG3Palette			=> sBG3Palette,
---		BG4Palette			=> sBG4Palette,
---
---		BGPriority			=> sBGPriority,
---		
---		OBJIndex			=> sObjIndex,
---		OBJPalette			=> sObjPalette,
---		OBJPriority			=> sObjPriority,
---		
---		R21232425_W1_ENABLE	=> R21232425_W1_ENABLE,
---		R21232425_W2_ENABLE	=> R21232425_W2_ENABLE,
---		R21232425_W1_INV	=> R21232425_W1_INV,
---		R21232425_W2_INV	=> R21232425_W2_INV,
---					
---		R212AB_WMASK_LSB	=> R212AB_WMASK_LSB,
---		R212AB_WMASK_MSB	=> R212AB_WMASK_MSB,
---					
---		W1_Inside			=> regInsideW1,
---		W2_Inside			=> regInsideW2,
---		
---		PaletteIndex		=> SubIndex,
---		ColorIn				=> SubColor,
---		
---		RGB					=> sSubColor,
---		selectOut			=> selectSub
---	);
+	instanceSub : PPU_MainSub port map
+	(
+		clock				=> clock,
+		R2105_BGMode 		=> R2105_BGMode,
+		R2105_BG3Priority	=> R2105_BG3Priority,
+		Enable_BG			=> R212D_SUB,
+		Enable_Win			=> R212F_WMASK_SUB,
+		
+		R2130_DIRECTCOLOR	=> R2130_DIRECTCOLOR,
+		
+		BG1Index			=> sBG1Index,
+		BG2Index			=> sBG2Index,
+		BG3Index			=> sBG3Index,
+		BG4Index			=> sBG4Index,
+		
+		BG1Palette			=> sBG1Palette,
+		BG2Palette			=> sBG2Palette,
+		BG3Palette			=> sBG3Palette,
+		BG4Palette			=> sBG4Palette,
 
---	--
---	-- Window Color Management.
---	--
---	winMsk <= R212AB_WMASK_MSB(5) & R212AB_WMASK_LSB(5);
---	ALWAYS_ENABLE_HERE <= '1';
---	instanceWC_Color : PPU_WindowClip port map
---	( 	InsideW1	=> regInsideW1,
---		InsideW2	=> regInsideW2,
---		EnableW1	=> R21232425_W1_ENABLE(5),
---		EnableW2	=> R21232425_W2_ENABLE(5),
---		InversionW1	=> R21232425_W1_INV(5),
---		InversionW2	=> R21232425_W2_INV(5),
---		EnableSubMain
---					=> ALWAYS_ENABLE_HERE,
---		WindowMaskLogicReg
---					=> winMsk,
---		inside		=> insideColor -- Out
---	);
---
---	--
---	process(clock, R2130_CLIPCOLORMATH, R2130_PREVENTCOLORMATH, insideColor)
---	begin
+		BGPriority			=> sBGPriority,
+		
+		OBJIndex			=> sObjIndex,
+		OBJPalette			=> sObjPalette,
+		OBJPriority			=> sObjPriority,
+		
+		R21232425_W1_ENABLE	=> R21232425_W1_ENABLE,
+		R21232425_W2_ENABLE	=> R21232425_W2_ENABLE,
+		R21232425_W1_INV	=> R21232425_W1_INV,
+		R21232425_W2_INV	=> R21232425_W2_INV,
+					
+		R212AB_WMASK_LSB	=> R212AB_WMASK_LSB,
+		R212AB_WMASK_MSB	=> R212AB_WMASK_MSB,
+					
+		W1_Inside			=> regInsideW1,
+		W2_Inside			=> regInsideW2,
+		
+		PaletteIndex		=> SubIndex,
+		ColorIn				=> SubColor,
+		
+		RGB					=> sSubColor,
+		selectOut			=> selectSub
+	);
+
+	--
+	-- Window Color Management.
+	--
+	winMsk <= R212AB_WMASK_MSB(5) & R212AB_WMASK_LSB(5);
+	ALWAYS_ENABLE_HERE <= '1';
+	instanceWC_Color : PPU_WindowClip port map
+	( 	InsideW1	=> regInsideW1,
+		InsideW2	=> regInsideW2,
+		EnableW1	=> R21232425_W1_ENABLE(5),
+		EnableW2	=> R21232425_W2_ENABLE(5),
+		InversionW1	=> R21232425_W1_INV(5),
+		InversionW2	=> R21232425_W2_INV(5),
+		EnableSubMain
+					=> ALWAYS_ENABLE_HERE,
+		WindowMaskLogicReg
+					=> winMsk,
+		inside		=> insideColor -- Out
+	);
+
+	--
+	process(clock, R2130_CLIPCOLORMATH, R2130_PREVENTCOLORMATH, insideColor)
+	begin
+		insideColMain	<= '1';
+		insideColSub	<= '1';
 --		case R2130_CLIPCOLORMATH is
 --		when CONSTANTS.NEVER =>
 --			insideColMain	<= '0'; -- Never
@@ -550,56 +558,56 @@ begin
 --		when others =>
 --			insideColSub	<= '1'; -- Always.
 --		end case;
---
---		--
---		-- Pipeline Color Window to match palette read.
---		--
---		if rising_edge(clock) then
---			regInsideColSub  <= insideColSub;
---			regInsideColMain <= insideColMain;
---		end if;
---	end process;
---	
---	----------------------------------------------------------------------------------------
---	--  Cycle 2 : Palette reading has occured or Direct color piped / color window piped.
---	----------------------------------------------------------------------------------------
---	
---	--
---	-- Pixel Blend Instance
---	--
---	instanceColorProcess : PPU_OutputPixel port map
---	(
---		winColSubInside 	=> regInsideColSub,
---		winColMainInside 	=> regInsideColMain,
---		mainColor 			=> sMainColor,
---		mainSelect 			=> selectMain,
---		subColor 			=> sSubColor,
---		subSelect 			=> selectSub,
---		enableMath_2131 	=> R2131_ENABLEMATH_UNIT,
---		fixedColorR			=> R2132_FIXEDCOLOR_R,
---		fixedColorG			=> R2132_FIXEDCOLOR_G,
---		fixedColorB			=> R2132_FIXEDCOLOR_B,
---		addSubScreen_2130 	=> R2130_ADDSUBSCR,
---		addSub_2131 		=> R2131_COLORMATH_SUB,
---		half_2130 			=> R2131_COLORMATH_HALF,
---		 
---		resultColor 		=> sMixColor
---	);
---	
---	--
---	-- Brightness
---	--
---	instanceBrightness : PPU_BRIGHTNESS port map
---	(
---		-- BGR order.
---		Rin		=> sMixColor(4 downto 0),
---		Gin		=> sMixColor(9 downto 5),
---		Bin		=> sMixColor(14 downto 10),
---		
---		BrightNess	=> R2100_Brigthness,
---
---		ROut	=> Red,
---		GOut	=> Green,
---		BOut	=> Blue
---	);
+
+		--
+		-- Pipeline Color Window to match palette read.
+		--
+		if rising_edge(clock) then
+			regInsideColSub  <= insideColSub;
+			regInsideColMain <= insideColMain;
+		end if;
+	end process;
+	
+	----------------------------------------------------------------------------------------
+	--  Cycle 2 : Palette reading has occured or Direct color piped / color window piped.
+	----------------------------------------------------------------------------------------
+	
+	--
+	-- Pixel Blend Instance
+	--
+	instanceColorProcess : PPU_OutputPixel port map
+	(
+		winColSubInside 	=> regInsideColSub,
+		winColMainInside 	=> regInsideColMain,
+		mainColor 			=> sMainColor,
+		mainSelect 			=> selectMain,
+		subColor 			=> sSubColor,
+		subSelect 			=> selectSub,
+		enableMath_2131 	=> R2131_ENABLEMATH_UNIT,
+		fixedColorR			=> R2132_FIXEDCOLOR_R,
+		fixedColorG			=> R2132_FIXEDCOLOR_G,
+		fixedColorB			=> R2132_FIXEDCOLOR_B,
+		addSubScreen_2130 	=> R2130_ADDSUBSCR,
+		addSub_2131 		=> R2131_COLORMATH_SUB,
+		half_2130 			=> R2131_COLORMATH_HALF,
+		 
+		resultColor 		=> sMixColor
+	);
+	
+	--
+	-- Brightness
+	--
+	instanceBrightness : PPU_BRIGHTNESS port map
+	(
+		-- BGR order.
+		Rin		=> sMixColor(4 downto 0),
+		Gin		=> sMixColor(9 downto 5),
+		Bin		=> sMixColor(14 downto 10),
+		
+		BrightNess	=> R2100_Brigthness,
+
+		ROut	=> Red,
+		GOut	=> Green,
+		BOut	=> Blue
+	);
 end ArchiPPU_ChipSetLow;

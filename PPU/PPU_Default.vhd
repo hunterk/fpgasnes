@@ -16,7 +16,7 @@ package CONSTREG is
 	constant R05_BG3Priority		: STD_LOGIC := '1';
 	constant R05_BGMode			: STD_LOGIC_VECTOR := "001";
 
-	constant R06_MosaicSize		: STD_LOGIC_VECTOR := "0011";
+	constant R06_MosaicSize		: STD_LOGIC_VECTOR := "0000";
 	constant R06_BGMosaicEnable	: STD_LOGIC_VECTOR := "0100";
 
 	constant R07_BG1AddrTileMap	: STD_LOGIC_VECTOR := "001000";
@@ -59,7 +59,8 @@ package CONSTREG is
 	constant R1F_M7CX				: STD_LOGIC_VECTOR := "0000000000000";
 	constant R20_M7CY				: STD_LOGIC_VECTOR := "0000000000000";
 
-	constant R232425_W1_ENABLE		: STD_LOGIC_VECTOR := "000000";
+	-- Enable and ASSIGN window to each
+	constant R232425_W1_ENABLE		: STD_LOGIC_VECTOR := "000100";
 	constant R232425_W2_ENABLE		: STD_LOGIC_VECTOR := "000000";
 	constant R232425_W1_INV		: STD_LOGIC_VECTOR := "000000";
 	constant R232425_W2_INV		: STD_LOGIC_VECTOR := "000000";
@@ -75,8 +76,9 @@ package CONSTREG is
 	constant R2C_MAIN				: STD_LOGIC_VECTOR := "00100";
 	constant R2D_SUB				: STD_LOGIC_VECTOR := "10011";
 
-	constant R2E_WMASK_MAIN		: STD_LOGIC_VECTOR := "10101";
-	constant R2F_WMASK_SUB			: STD_LOGIC_VECTOR := "00010";
+	-- Enable window masking globally per BG/OBJ...
+	constant R2E_WMASK_MAIN			: STD_LOGIC_VECTOR := "10100";
+	constant R2F_WMASK_SUB			: STD_LOGIC_VECTOR := "00011";
 
 	constant R30_CLIPCOLORMATH		: STD_LOGIC_VECTOR := "00";
 	constant R30_PREVENTCOLORMATH	: STD_LOGIC_VECTOR := "01";
@@ -87,9 +89,9 @@ package CONSTREG is
 	constant R31_COLORMATH_HALF	: STD_LOGIC := '0';
 	constant R31_ENABLEMATH_UNIT	: STD_LOGIC_VECTOR := "100000";
 
-	constant R32_FIXEDCOLOR_R		: STD_LOGIC_VECTOR := "00000";
+	constant R32_FIXEDCOLOR_R		: STD_LOGIC_VECTOR := "11111";
 	constant R32_FIXEDCOLOR_G		: STD_LOGIC_VECTOR := "00000";
-	constant R32_FIXEDCOLOR_B		: STD_LOGIC_VECTOR := "00000";
+	constant R32_FIXEDCOLOR_B		: STD_LOGIC_VECTOR := "11111";
 
 	constant R33_EXT_SYNC			: STD_LOGIC := '0';
 	constant R33_M7_EXTBG			: STD_LOGIC := '0';
