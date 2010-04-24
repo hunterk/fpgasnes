@@ -52,7 +52,9 @@ package CONSTANTS is
 	-- constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1E6"; -- X + Offset = 0 when X = 17 (512-17)
 	
 	-- 16 pix shift.
-	constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1ED";
+--	constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1ED";
+	constant OFFSETX_TO0		: STD_LOGIC_VECTOR := x"1E5"; -- X + Offset = 0 when X = 17 (512-17)
+	
 	constant VISIBLEX			: integer := 287;
 	constant VISIBLEY			: integer := 447;
 	

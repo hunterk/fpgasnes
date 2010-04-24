@@ -132,18 +132,21 @@ begin
 	 if (intY = 900) then
 		CPUwrite	<= '0';
 	 else
-		CPUwrite	<= '1';
+		CPUwrite	<= '0';
 	 end if;
 
 		-- Show pixel.
       if (intX >= 144) and (intX < 700 ) then -- Show pixel.
 			if ((intY>=0) and (intY<480)) then
 				showPixel <= '1';
+				reset <= '0';
 			else
 				showPixel <= '0';
+				reset <= '1';
 			end if;
 	   else
          showPixel <= '0';
+		reset <= '0';
       end if;
 	end process;
 	
@@ -153,7 +156,6 @@ begin
 --	B <= intX(8 downto 1);
 	cpuAddress <= intX(5 downto 0);
 	DataIn <= intY(7 downto 0);
-	reset <= '0';
 	
 	instanceSystem : PPU_System port map
 	(

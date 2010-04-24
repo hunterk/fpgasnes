@@ -57,7 +57,7 @@ entity PPU_Registers is
 				--   PPU Register exposed to rendering logic blocks + internal Logic
 				-- ##############################################################
 				
-				R2100_DisplayEnabled	: out STD_LOGIC;
+				R2100_DisplayDisabled	: out STD_LOGIC;
 				R2100_Brigthness		: out STD_LOGIC_VECTOR (3 downto 0);
 				
 				R2101_OAMBaseSize		: out STD_LOGIC_VECTOR (2 downto 0); 
@@ -170,7 +170,7 @@ end PPU_Registers;
 ----------------------------------------------------------------------------------
 
 architecture PPU_Registers of PPU_Registers is
-	signal reg00_DisplayEnabled		: STD_LOGIC;
+	signal reg00_DisplayDisabled	: STD_LOGIC;
 	signal reg00_Brigthness			: STD_LOGIC_VECTOR (3 downto 0);
 	
 	signal reg01_OAMBaseSize		: STD_LOGIC_VECTOR (2 downto 0); 
@@ -475,7 +475,7 @@ begin
 --			tmpValBG				<= "00000000";
 --			tmpValM7				<= "00000000";
 --
-			reg00_DisplayEnabled	<= CONSTREG.R00_DisplayEnabled;
+			reg00_DisplayDisabled	<= CONSTREG.R00_DisplayDisabled;
 			reg00_Brigthness		<= CONSTREG.R00_Brigthness;
                                              
 			reg01_OAMBaseSize		<= CONSTREG.R01_OAMBaseSize;
@@ -1013,7 +1013,7 @@ begin
 --	    end if;
 --    end process;
 	
-	R2100_DisplayEnabled	 <= reg00_DisplayEnabled;
+	R2100_DisplayDisabled	 <= reg00_DisplayDisabled;
 	R2100_Brigthness		 <= reg00_Brigthness;
 
 	R2101_OAMBaseSize		 <= reg01_OAMBaseSize;

@@ -141,6 +141,8 @@ architecture PPU_MainSub of PPU_MainSub is
 	
 	signal validBG2Idx,validBG3Idx,validBG4Idx,validOBJIdx		: STD_LOGIC;
 
+	signal regSelectOut		: STD_LOGIC_VECTOR(2 downto 0);
+	
 	constant PAL_004COL		: STD_LOGIC_VECTOR := "00";
 	constant PAL_016COL		: STD_LOGIC_VECTOR := "01";
 	constant PAL_256COL		: STD_LOGIC_VECTOR := "10";
@@ -280,11 +282,18 @@ begin
 	--
 	-- Priority.
 	--
-	prioBG1Valid <= bg0_WC and Enable_BG(0) and BG1NZero and directColor;
-	prioBG2Valid <= bg1_WC and Enable_BG(1) and validBG2Idx;
-	prioBG3Valid <= bg2_WC and Enable_BG(2) and validBG3Idx;
-	prioBG4Valid <= bg3_WC and Enable_BG(3) and validBG4Idx;
-	prioOBJValid <= Obj_WC and Enable_BG(4) and validOBJIdx;
+--	prioBG1Valid <= bg0_WC and Enable_BG(0) and BG1NZero and directColor;
+--	prioBG2Valid <= bg1_WC and Enable_BG(1) and validBG2Idx;
+--	prioBG3Valid <= bg2_WC and Enable_BG(2) and validBG3Idx;
+--	prioBG4Valid <= bg3_WC and Enable_BG(3) and validBG4Idx;
+--	prioOBJValid <= Obj_WC and Enable_BG(4) and validOBJIdx;
+
+	-- TODO : now experimental test WITHOUT Window clipping.
+	prioBG1Valid <= Enable_BG(0) and BG1NZero and directColor;
+	prioBG2Valid <= Enable_BG(1) and validBG2Idx;
+	prioBG3Valid <= Enable_BG(2) and validBG3Idx;
+	prioBG4Valid <= Enable_BG(3) and validBG4Idx;
+	prioOBJValid <= Enable_BG(4) and validOBJIdx;
 	
 	instPrioUnit : PPU_PriorityUnit port map
 	(
@@ -404,7 +413,7 @@ begin
 			index := "000000" & BG4Index;
 			pal   := BG4Palette;
 		when others => -- BACKDROP
-			index := "00000000"; -- TODO : Is back drop color palette 0 ???
+			index := "00000000"; -- Seems to be correct in BSnes too : buffer filled with 0 at first. Same result.
 			pal   := "000";
 		end case;
 		
@@ -452,6 +461,7 @@ begin
 	begin
 		if rising_edge(clock) then
 			regDirectRGB <= directRGB;
+			regSelectOut <= unitOut;
 		end if;
 	end process;
 	
@@ -466,9 +476,10 @@ begin
 		else
 			RGB <= ColorIn;
 		end if;
+		
+		selectOut <= regSelectOut;
 	end process;
 	
-	selectOut <= unitOut;
 	
 end PPU_MainSub;
 

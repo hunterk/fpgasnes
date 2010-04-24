@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 package CONSTREG is
-	constant R00_DisplayEnabled	: STD_LOGIC := '0';
+	constant R00_DisplayDisabled	: STD_LOGIC := '0';
 	constant R00_Brigthness		: STD_LOGIC_VECTOR := "1111";
 
 	constant R01_OAMBaseSize		: STD_LOGIC_VECTOR := "011";
@@ -37,7 +37,7 @@ package CONSTREG is
 	constant R0E_BG1_VOFS			: STD_LOGIC_VECTOR := "0011000000";
 	constant R0F_BG2_HOFS			: STD_LOGIC_VECTOR := "0000000010";
 	constant R10_BG2_VOFS			: STD_LOGIC_VECTOR := "0011000000";
-	constant R11_BG3_HOFS			: STD_LOGIC_VECTOR := "0000000011";
+	constant R11_BG3_HOFS			: STD_LOGIC_VECTOR := "0000000000";
 	constant R12_BG3_VOFS			: STD_LOGIC_VECTOR := "0000000000";
 	constant R13_BG4_HOFS			: STD_LOGIC_VECTOR := "0000000000";
 	constant R14_BG4_VOFS			: STD_LOGIC_VECTOR := "0000000000";
