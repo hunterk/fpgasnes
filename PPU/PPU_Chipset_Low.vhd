@@ -51,7 +51,7 @@ entity PPU_Chipset_Low is
 				-- BGEnabledMain		: in STD_LOGIC_VECTOR (3 downto 0);
 				-- BGEnabledSub			: in STD_LOGIC_VECTOR (3 downto 0);
 				
-				R2100_DisplayEnabled	: in STD_LOGIC;
+				R2100_DisplayDisabled	: in STD_LOGIC;
 				R2100_Brigthness		: in STD_LOGIC_VECTOR (3 downto 0);
 
 				R2105_BGMode			: in STD_LOGIC_VECTOR (2 downto 0);
@@ -205,6 +205,7 @@ architecture ArchiPPU_ChipSetLow of PPU_ChipSet_Low is
 		Port ( 	
 			winColSubInside 	: in STD_LOGIC;
 			winColMainInside 	: in STD_LOGIC;
+			mainObjPal			: in STD_LOGIC;
 			mainColor			: in STD_LOGIC_VECTOR(14 downto 0);
 			mainSelect			: in STD_LOGIC_VECTOR( 2 downto 0);
 			subColor 			: in STD_LOGIC_VECTOR(14 downto 0);
@@ -243,13 +244,17 @@ architecture ArchiPPU_ChipSetLow of PPU_ChipSet_Low is
 	signal sObjPriority	: STD_LOGIC_VECTOR ( 1 downto 0);
 
 	signal sMainColor, sSubColor, sMixColor : STD_LOGIC_VECTOR (14 downto 0);
+	
 	signal selectMain, selectSub : STD_LOGIC_VECTOR(2 downto 0);
+	signal sMainIndex	: STD_LOGIC_VECTOR ( 7 downto 0);
+	signal regObjPal	: STD_LOGIC;
 	
 	signal winMsk : STD_LOGIC_VECTOR (1 downto 0);
 	signal insideColor, ALWAYS_ENABLE_HERE : STD_LOGIC;
 
 	signal insideColSub, insideColMain, regInsideColSub, regInsideColMain : STD_LOGIC;
 
+	signal sRed, sGreen, sBlue : STD_LOGIC_VECTOR(4 downto 0);
 begin
 	----------------------------------------------------------
 	--  Cycle 0 : Window / Line Read.
@@ -314,27 +319,18 @@ begin
 	-- Directly use main output.
 	--
 
---	process(DataPixels)
---	begin
-----		if (DataPixels(21 downto 20) /= "00") then
-----			MainIndex	<= "000" & DataPixels(12 downto 10) & DataPixels(21 downto 20); -- BG3
-----		else
-----			if (DataPixels(25 downto 22) /= "0000") then
-----				MainIndex	<= "0" & DataPixels(6 downto 4) & DataPixels(25 downto 22); -- BG1
-----			else
-----				MainIndex	<= "0" & DataPixels(9 downto 7) & DataPixels(19 downto 16); -- BG2
-----			end if;
-----		end if;
---		if (xCoord(7) = '0') then
---			Red			<= sMainColor(4 downto 0);
---			Green		<= sMainColor(9 downto 5);
---			Blue		<= sMainColor(14 downto 10);
---		else
---			Red			<= sSubColor(4 downto 0);
---			Green		<= sSubColor(9 downto 5);
---			Blue		<= sSubColor(14 downto 10);
---		end if;
---	end process;
+	process(DataPixels)
+	begin
+--			if (xCoord(7) = '0') then
+--				sRed			<= sMainColor(4 downto 0);
+--				sGreen		<= sMainColor(9 downto 5);
+--				sBlue		<= sMainColor(14 downto 10);
+--			else
+--				sRed			<= sSubColor(4 downto 0);
+--				sGreen		<= sSubColor(9 downto 5);
+--				sBlue		<= sSubColor(14 downto 10);
+--			end if;
+	end process;
 	
 --	Red			<= MainColor(4 downto 0);
 --	Green		<= MainColor(9 downto 5);
@@ -459,12 +455,13 @@ begin
 		W1_Inside			=> regInsideW1,
 		W2_Inside			=> regInsideW2,
 		
-		PaletteIndex		=> MainIndex, -- out
+		PaletteIndex		=> sMainIndex, -- out
 		ColorIn				=> MainColor,
 		
 		RGB					=> sMainColor,
 		selectOut			=> selectMain
 	);
+	MainIndex <= sMainIndex;
 
 	--
 	-- Sub Unit
@@ -565,6 +562,7 @@ begin
 		if rising_edge(clock) then
 			regInsideColSub  <= insideColSub;
 			regInsideColMain <= insideColMain;
+			regObjPal		 <= sMainIndex(6);
 		end if;
 	end process;
 	
@@ -579,6 +577,7 @@ begin
 	(
 		winColSubInside 	=> regInsideColSub,
 		winColMainInside 	=> regInsideColMain,
+		mainObjPal			=> regObjPal,	-- 1Pppxxxx : In case of sprite, and palette 0..3 does not participate in color math.
 		mainColor 			=> sMainColor,
 		mainSelect 			=> selectMain,
 		subColor 			=> sSubColor,
@@ -606,8 +605,24 @@ begin
 		
 		BrightNess	=> R2100_Brigthness,
 
-		ROut	=> Red,
-		GOut	=> Green,
-		BOut	=> Blue
+		ROut	=> sRed,
+		GOut	=> sGreen,
+		BOut	=> sBlue
 	);
+
+	--
+	-- Debug when graphic / bus mode is disabled.
+	--
+	process(R2100_DisplayDisabled, sRed, sGreen, sBlue, xCoord)
+	begin
+		if (R2100_DisplayDisabled = '0') then
+			Red			<= sRed;
+			Green		<= sGreen;
+			Blue		<= sBlue;
+		else
+			Red			<= xCoord(4 downto 0);
+			Green		<= xCoord(5 downto 1);
+			Blue		<= xCoord(6 downto 2);
+		end if;
+	end process;
 end ArchiPPU_ChipSetLow;

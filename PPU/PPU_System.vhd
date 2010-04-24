@@ -105,7 +105,7 @@ architecture ArchiPPU_System of PPU_System is
 		--   PPU Register exposed to rendering logic blocks + internal Logic
 		-- ##############################################################
 		
-		R2100_DisplayEnabled	: out STD_LOGIC;
+		R2100_DisplayDisabled	: out STD_LOGIC;
 		R2100_Brigthness		: out STD_LOGIC_VECTOR (3 downto 0);
 		
 		R2101_OAMBaseSize		: out STD_LOGIC_VECTOR (2 downto 0); 
@@ -402,7 +402,7 @@ architecture ArchiPPU_System of PPU_System is
 		-- Register Side.
 		--
 				
-		R2100_DisplayEnabled	: in STD_LOGIC;
+		R2100_DisplayDisabled	: in STD_LOGIC;
 		R2100_Brigthness		: in STD_LOGIC_VECTOR (3 downto 0);
 
 		R2105_BGMode			: in STD_LOGIC_VECTOR (2 downto 0);
@@ -509,7 +509,7 @@ architecture ArchiPPU_System of PPU_System is
 	signal sCGRAMDataWriteFromRegisters	: STD_LOGIC_VECTOR(14 downto 0);
 	signal sCGRAMWriteSigFromRegisters	: STD_LOGIC;
 		
-	signal R2100_DisplayEnabled		: STD_LOGIC;
+	signal R2100_DisplayDisabled		: STD_LOGIC;
 	signal R2100_Brigthness				: STD_LOGIC_VECTOR (3 downto 0);
 		                                
 	signal todoR2101_OAMBaseSize			: STD_LOGIC_VECTOR (2 downto 0);
@@ -649,7 +649,7 @@ begin
 		-- ##############################################################
 		--   PPU Register exposed to rendering logic blocks + internal Logic
 		-- ##############################################################		
-		R2100_DisplayEnabled	=> R2100_DisplayEnabled,
+		R2100_DisplayDisabled	=> R2100_DisplayDisabled,
 		R2100_Brigthness		=> R2100_Brigthness,
 		
 		R2101_OAMBaseSize		=> todoR2101_OAMBaseSize,
@@ -825,7 +825,7 @@ begin
 		--
 		-- Find the region.
 		--
-		if (NormalX>=0 and NormalX<=255) then
+		if (NormalX>=0 and NormalX<=258) then
 			visibleX <= '1';
 		else
 			visibleX <= '0';
@@ -840,7 +840,7 @@ begin
 		--
 		-- VRAM Arbitration.
 		--
-		if (visibleX='1' and visibleY='1') then
+		if (visibleX='1' and visibleY='1' and R2100_DisplayDisabled='0') then
 			--- INSIDE SCREEN     ---
 			--=======================
 			VRAMWrite					<= '0';
@@ -906,7 +906,7 @@ begin
 		readOnlyAdrCGRAM 		<= sPaletteMainReadAdr;
 		
 		-- Last X Pixel of line AND with valid Y range.
-		if (NormalX >= 256) then
+		if (NormalX >= 267) then
 			startline <= '1';
 		else
 			startline <= '0';
@@ -1052,7 +1052,7 @@ begin
 		--
 		-- Register Side.
 		--
-		R2100_DisplayEnabled	=> R2100_DisplayEnabled,
+		R2100_DisplayDisabled	=> R2100_DisplayDisabled,
 		R2100_Brigthness		=> R2100_Brigthness,
 		
 		R2105_BGMode			=> R2105_BGMode,

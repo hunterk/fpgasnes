@@ -1380,11 +1380,11 @@ begin
 
 		adrX			 			<= tmpFuckX_ShitVHDL_Fuckinglanguage_stupid_simulation(8 downto 0);
 
-		if ((adrX>=0) and (adrX<=255)) then
+		if ((adrX>=1) and (adrX<=256)) then
 			WriteS			 <= '1';
 		else
 			WriteS			 <= '0';
 		end if;
-		LineCacheAddress 			<= adrX(7 downto 0);
+		LineCacheAddress 			<= adrX(7 downto 0) + "11111111";
 	end process;
 end PPU_PixelFetch;
