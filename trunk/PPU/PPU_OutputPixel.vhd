@@ -69,8 +69,15 @@ begin
 		-- s     = Add subscreen (instead of fixed color)
 		--
 		if (addSubScreen_2130 = '1') then
-			bgSub	<= subSelect;
-			pixSub	<= subColor;
+			if (subSelect = CONSTANTS.BACKDROP_SEL) then
+				-- TODO : if mode 5 / 6 or HiRes
+				-- set palette 0 instead.
+				bgSub	<= CONSTANTS.BACKDROP_SEL;
+				pixSub	<= fixedColorB & fixedColorG & fixedColorR;
+			else
+				bgSub	<= subSelect;
+				pixSub	<= subColor;
+			end if;
 		else
 			bgSub	<= CONSTANTS.BACKDROP_SEL;
 			pixSub	<= fixedColorB & fixedColorG & fixedColorR;
