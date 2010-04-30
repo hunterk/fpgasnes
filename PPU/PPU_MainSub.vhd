@@ -466,7 +466,7 @@ begin
 	end process;
 	
 	process (R2130_DIRECTCOLOR, unitOut, indexSelect
-			,ColorIn, regDirectRGB)
+			,ColorIn, regDirectRGB, regSelectOut)
 	begin
 		PaletteIndex <= indexSelect; -- Read Current pixel
 		

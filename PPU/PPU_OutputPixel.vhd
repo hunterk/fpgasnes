@@ -137,7 +137,7 @@ begin
 		Output	=> colorMathBOut
 	);
 
-	process(mainSelect)
+	process(mainSelect, winColSubInside, mainObjPal, enableMath_2131)
 		variable enable			: STD_LOGIC;
 		variable validSource	: STD_LOGIC;
 	begin
@@ -170,8 +170,8 @@ begin
 		end if;
 	end process;
 
-	process (	colorMathROut,colorMathGOut,colorMathBOut,winColSubInside,
-				mainSelect,	enableMath_2131, pixMain )
+	process (	colorMathROut,colorMathGOut,colorMathBOut,
+				pixMain, useColorMath )
 	begin
 		if (useColorMath = '1') then
 			resultColor <= colorMathBOut & colorMathGOut & colorMathROut;
