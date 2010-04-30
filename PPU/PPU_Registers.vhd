@@ -283,7 +283,7 @@ architecture PPU_Registers of PPU_Registers is
 	signal sCGData, CGData			: STD_LOGIC_VECTOR(7 downto 0);
 	
 begin
-	
+--	
 --	CGRAMAddress	<= sCGAddr(8 downto 1);
 --	CGRAMwrite		<= not(sReadMode and sCGAddr(0)); -- Write when LSB is 1. = perform write.
 --	CGRAMDataOut	<= DataIn(6 downto 0) & rCGWData; -- 15 Bit.
@@ -299,7 +299,7 @@ begin
 --			CGData
 --			)
 --	begin
---		if (CPUwrite = '0') then
+----		if (CPUwrite = '0') then
 --			case Address is
 --			when "111001" => -- 0x39 VMDATALREAD
 --				DataOut <= regVRAMData(7 downto 0);
@@ -313,9 +313,9 @@ begin
 --				--
 --				DataOut <= "00000010";
 --			end case;
---		else
---			DataOut <= "00000001";
---		end if;
+----		else
+----			DataOut <= "00000001";
+----		end if;
 --	end process;
 --	
 --	-- ######################################################################
@@ -325,19 +325,19 @@ begin
 --	process(Address, CPUWrite,
 --			sCGAddr)
 --	begin
---		if (CPUWrite = '1') then
---			case Address is
---			when "010001" => -- CGADD
---				sAdrMode	<= "00";
---				sReadMode	<= '1';
---			when "010010" => -- CGDATA
---				sAdrMode	<= "01";
---				sReadMode	<= not(sCGAddr(0));	-- Adr 1 : perform WRITE, else wait.
---			when others   =>
---				sAdrMode	<= "10";
---				sReadMode	<= '1'; -- Avoid Write.
---			end case;
---		else
+----		if (CPUWrite = '1') then
+----			case Address is
+----			when "010001" => -- CGADD
+----				sAdrMode	<= "00";
+----				sReadMode	<= '1';
+----			when "010010" => -- CGDATA
+----				sAdrMode	<= "01";
+----				sReadMode	<= not(sCGAddr(0));	-- Adr 1 : perform WRITE, else wait.
+----			when others   =>
+----				sAdrMode	<= "10";
+----				sReadMode	<= '1'; -- Avoid Write.
+----			end case;
+----		else
 --			-- CGDATAREAD
 --			if (Address = "111011") then
 --				sAdrMode	<= "01";
@@ -347,7 +347,7 @@ begin
 --				sAdrMode	<= "10";
 --				sReadMode	<= '1'; -- Avoid Write.
 --			end if;
---		end if;
+----		end if;
 --	end process;
 --	
 --	process(clock, reset, sCGData, sCGWData, sCGAddr, sReadMode)
@@ -412,50 +412,50 @@ begin
 --	--
 --	process(Address, DataIn, regVRAMAddress, regVRAMData, CPUWrite, tmpVRAMread, CGData)
 --	begin
---		if (CPUwrite = '1') then
---			case Address is
---			when "010110" => -- 0x16 : VMADDL
---				tmpVRAMAddress <= regVRAMAddress(14 downto 8) & DataIn;
---				VRAMwrite	<= '0';
---				tmpVRAMread	<= '1';
---				VRAMlowHigh	<= '0';
---			when "010111" => -- 0x17 : VMADDH
---				tmpVRAMAddress <= DataIn(6 downto 0) & regVRAMAddress(7 downto 0);
---				VRAMwrite	<= '0';
---				tmpVRAMread	<= '1';
---				VRAMlowHigh <= '0';
---			when "011000" => -- 0x18 : VMDATAL
---				tmpVRAMAddress <= regVRAMAddress;
---				VRAMwrite	<= '1';
---				tmpVRAMread	<= '0';
---				VRAMlowHigh <= '0';
---			when "011001" => -- 0x19 : VMDATAH
---				tmpVRAMAddress <= regVRAMAddress;
---				VRAMwrite	<= '1';
---				tmpVRAMread	<= '0';
---				VRAMlowHigh <= '1';
---			when "111001" => -- 0x39 VMDATALREAD
---				tmpVRAMAddress <= regVRAMAddress;
---				VRAMwrite	<= '0';
---				tmpVRAMread	<= '1';
---				VRAMlowHigh <= '0';				
---			when "111010" => -- 0x3A VMDATAHREAD
---				tmpVRAMAddress <= regVRAMAddress;
---				VRAMwrite	<= '0';
---				tmpVRAMread	<= '1';
---				VRAMlowHigh <= '0';
---			when others   =>
---				tmpVRAMAddress <= regVRAMAddress;
---				VRAMwrite	<= '0';
---				tmpVRAMread	<= '0';
---				VRAMlowHigh <= '0';
---			end case;
---		else
+----		if (CPUwrite = '1') then
+----			case Address is
+----			when "010110" => -- 0x16 : VMADDL
+----				tmpVRAMAddress <= regVRAMAddress(14 downto 8) & DataIn;
+----				VRAMwrite	<= '0';
+----				tmpVRAMread	<= '1';
+----				VRAMlowHigh	<= '0';
+----			when "010111" => -- 0x17 : VMADDH
+----				tmpVRAMAddress <= DataIn(6 downto 0) & regVRAMAddress(7 downto 0);
+----				VRAMwrite	<= '0';
+----				tmpVRAMread	<= '1';
+----				VRAMlowHigh <= '0';
+----			when "011000" => -- 0x18 : VMDATAL
+----				tmpVRAMAddress <= regVRAMAddress;
+----				VRAMwrite	<= '1';
+----				tmpVRAMread	<= '0';
+----				VRAMlowHigh <= '0';
+----			when "011001" => -- 0x19 : VMDATAH
+----				tmpVRAMAddress <= regVRAMAddress;
+----				VRAMwrite	<= '1';
+----				tmpVRAMread	<= '0';
+----				VRAMlowHigh <= '1';
+----			when "111001" => -- 0x39 VMDATALREAD
+----				tmpVRAMAddress <= regVRAMAddress;
+----				VRAMwrite	<= '0';
+----				tmpVRAMread	<= '1';
+----				VRAMlowHigh <= '0';				
+----			when "111010" => -- 0x3A VMDATAHREAD
+----				tmpVRAMAddress <= regVRAMAddress;
+----				VRAMwrite	<= '0';
+----				tmpVRAMread	<= '1';
+----				VRAMlowHigh <= '0';
+----			when others   =>
+----				tmpVRAMAddress <= regVRAMAddress;
+----				VRAMwrite	<= '0';
+----				tmpVRAMread	<= '0';
+----				VRAMlowHigh <= '0';
+----			end case;
+----		else
 --			tmpVRAMAddress <= regVRAMAddress;
 --			VRAMwrite	<= '0';
 --			tmpVRAMread	<= '0';
 --			VRAMlowHigh <= '0';
---		end if;
+----		end if;
 --	end process;
 --		
 --	VRAMAddress_PostTranslation <= 	tmpVRAMAddress
@@ -466,16 +466,20 @@ begin
 --										when reg15_VRAM_MAPPING = "10" else
 --									tmpVRAMAddress(14 downto 10) & tmpVRAMAddress(6 downto 0) & tmpVRAMAddress(9 downto 7);
 --	
---    process(clock, reset, Address, CPUwrite, DataIn)
---    begin
---		if reset = '1' then
+    process(clock, reset, Address, CPUwrite, DataIn)
+    begin
+		if reset = '1' then
+			reg00_DisplayDisabled	<= '1';
+		else
+			reg00_DisplayDisabled	<= '0';
+		end if;
 --			--
 --			-- System Default on reset.
 --			--
 --			tmpValBG				<= "00000000";
 --			tmpValM7				<= "00000000";
---
-			reg00_DisplayDisabled	<= CONSTREG.R00_DisplayDisabled;
+
+--			reg00_DisplayDisabled	<= CONSTREG.R00_DisplayDisabled;
 			reg00_Brigthness		<= CONSTREG.R00_Brigthness;
                                              
 			reg01_OAMBaseSize		<= CONSTREG.R01_OAMBaseSize;
@@ -571,101 +575,6 @@ begin
 			reg33_OBJ_INTERLACE		<= CONSTREG.R33_OBJ_INTERLACE;
 			reg33_SCR_INTERLACE		<= CONSTREG.R33_SCR_INTERLACE;
 
---			reg00_DisplayEnabled	<= '0';
---			reg00_Brigthness		<= "1111"; -- Screen Brightness full by default.
---
---			reg01_OAMBaseSize		<= "000";
---			reg01_OAMNameSelect		<= "00";
---			reg01_OAMNameBase		<= "000";
---
---			reg02_OAMPriority		<= '0';
---			reg02_OAMBaseAdr		<= "000000000";
---
---			reg05_BGSize			<= "0000";
---			reg05_BG3Priority		<= '0';
---			reg05_BGMode			<= "000";
---
---			reg06_MosaicSize		<= "0000";
---			reg06_BGMosaicEnable	<= "0000";
---
---			reg07_BG1AddrTileMap	<= "000000";
---			reg08_BG2AddrTileMap	<= "000000";
---			reg09_BG3AddrTileMap	<= "000000";
---			reg0A_BG4AddrTileMap	<= "000000";
---			reg0789A_BGsMapSX		<= "0000";
---			reg0789A_BGsMapSY		<= "0000";
---			
---			reg0B_BG1PixAddr		<= "000";
---			reg0B_BG2PixAddr		<= "000";
---			reg0C_BG3PixAddr		<= "000";
---			reg0C_BG4PixAddr		<= "000";
---
---			reg0D_M7_HOFS			<= "0000000000000";
---			reg0D_BG1_HOFS			<= "0000000000";
---			reg0E_M7_VOFS			<= "0000000000000";
---			reg0E_BG1_VOFS			<= "0000000000";
---			reg0F_BG2_HOFS			<= "0000000000";
---			reg10_BG2_VOFS			<= "0000000000";
---			reg11_BG3_HOFS			<= "0000000000";
---			reg12_BG3_VOFS			<= "0000000000";
---			reg13_BG4_HOFS			<= "0000000000";
---			reg14_BG4_VOFS			<= "0000000000";
---
---			reg15_VRAM_INCMODE		<= '1';	-- Increment on write HIGH default.
---			reg15_VRAM_MAPPING		<= "00";
---			reg15_VRAM_INCREMENT	<= "00"; -- Step of 1 default.
---
---			reg1A_M7_REPEAT			<= '0';
---			reg1A_M7_HFLIP			<= '0';
---			reg1A_M7_VFLIP			<= '0';
---			reg1A_M7_FILL			<= '0';
---
---			reg1B_M7A				<= "0000000000000000";
---			reg1C_M7B				<= "0000000000000000";
---			reg1D_M7C				<= "0000000000000000";
---			reg1E_M7D				<= "0000000000000000";
---
---			reg1F_M7CX				<= "0000000000000";
---			reg20_M7CY				<= "0000000000000";
---
---			reg232425_W1_ENABLE		<= "000000";
---			reg232425_W2_ENABLE		<= "000000";
---			reg232425_W1_INV		<= "000000";
---			reg232425_W2_INV		<= "000000";
---
---			reg26_W1_LEFT			<= "00000000";
---			reg27_W1_RIGHT			<= "00000000";
---			reg28_W2_LEFT			<= "00000000";
---			reg29_W2_RIGHT			<= "00000000";
---
---			reg2AB_WMASK_LSB		<= "000000";
---			reg2AB_WMASK_MSB		<= "000000";
---
---			reg2C_MAIN				<= "00000";
---			reg2D_SUB				<= "00000";
---
---			reg2E_WMASK_MAIN		<= "00000";
---			reg2F_WMASK_SUB			<= "00000";
---
---			reg30_CLIPCOLORMATH		<= "00";
---			reg30_PREVENTCOLORMATH	<= "00";
---			reg30_ADDSUBSCR			<= '0';
---			reg30_DIRECTCOLOR		<= '0';
---
---			reg31_COLORMATH_SUB		<= '0';
---			reg31_COLORMATH_HALF	<= '0';
---			reg31_ENABLEMATH_UNIT	<= "000000";
---
---			reg32_FIXEDCOLOR_R		<= "00000";
---			reg32_FIXEDCOLOR_G		<= "00000";
---			reg32_FIXEDCOLOR_B		<= "00000";
---
---			reg33_EXT_SYNC			<= '0';
---			reg33_M7_EXTBG			<= '0';
---			reg33_HIRES				<= '0';
---			reg33_OVERSCAN			<= '0';
---			reg33_OBJ_INTERLACE		<= '0';
---			reg33_SCR_INTERLACE		<= '0';
 			
 --			regPrevCycleRead		<= '0';
 --			regVRAMData				<= "0000000000000000";
@@ -682,7 +591,7 @@ begin
 --				--
 --				case (Address) is
 --				when "000000" =>
---					reg00_DisplayEnabled	<= DataIn(7);
+--					reg00_DisplayDisabled	<= DataIn(7);
 --					reg00_Brigthness		<= DataIn(3 downto 0);
 --					--  BSNES
 --					--  if(regs.display_disabled == true && cpu.vcounter() == (!overscan() ? 225 : 240)) {
@@ -982,36 +891,36 @@ begin
 --					-- DO NOTHING.
 --					--
 --				end case;
---			else
---				case (Address) is
---				when "111001" => -- 0x39 : VMREADDATAL
---					if (reg15_VRAM_INCMODE = '0') then
---						case (reg15_VRAM_INCREMENT) is
---						when "00" =>
---							regVRAMAddress			<= tmpVRAMAddress + 1;
---						when "01" =>
---							regVRAMAddress			<= tmpVRAMAddress + 32;
---						when others =>
---							regVRAMAddress			<= tmpVRAMAddress + 128;
---						end case;
---					end if;
---				when "111010" => -- 0x3A : VMREADDATAH
---					if (reg15_VRAM_INCMODE = '1') then
---						case (reg15_VRAM_INCREMENT) is
---						when "00" =>
---							regVRAMAddress			<= tmpVRAMAddress + 1;
---						when "01" =>
---							regVRAMAddress			<= tmpVRAMAddress + 32;
---						when others =>
---							regVRAMAddress			<= tmpVRAMAddress + 128;
---						end case;
---					end if;
---				when others =>
---					-- nothing
---				end case;
+----			else
+----				case (Address) is
+----				when "111001" => -- 0x39 : VMREADDATAL
+----					if (reg15_VRAM_INCMODE = '0') then
+----						case (reg15_VRAM_INCREMENT) is
+----						when "00" =>
+----							regVRAMAddress			<= tmpVRAMAddress + 1;
+----						when "01" =>
+----							regVRAMAddress			<= tmpVRAMAddress + 32;
+----						when others =>
+----							regVRAMAddress			<= tmpVRAMAddress + 128;
+----						end case;
+----					end if;
+----				when "111010" => -- 0x3A : VMREADDATAH
+----					if (reg15_VRAM_INCMODE = '1') then
+----						case (reg15_VRAM_INCREMENT) is
+----						when "00" =>
+----							regVRAMAddress			<= tmpVRAMAddress + 1;
+----						when "01" =>
+----							regVRAMAddress			<= tmpVRAMAddress + 32;
+----						when others =>
+----							regVRAMAddress			<= tmpVRAMAddress + 128;
+----						end case;
+----					end if;
+----				when others =>
+----					-- nothing
+----				end case;
 --			end if;
 --	    end if;
---    end process;
+    end process;
 	
 	R2100_DisplayDisabled	 <= reg00_DisplayDisabled;
 	R2100_Brigthness		 <= reg00_Brigthness;

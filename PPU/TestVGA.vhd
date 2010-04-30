@@ -28,15 +28,24 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity TestVGA is
-    Port ( clock : in  STD_LOGIC;
-           clockVGA : out  STD_LOGIC;
-           R : out  STD_LOGIC_VECTOR (7 downto 0);
-           G : out  STD_LOGIC_VECTOR (7 downto 0);
-           B : out  STD_LOGIC_VECTOR (7 downto 0);
-           HSync : out  STD_LOGIC;
-           VSync : out  STD_LOGIC;
-           CSync : out  STD_LOGIC;
-           DE : out  STD_LOGIC);
+    Port (	clock		: in	STD_LOGIC;
+			reset		: in	STD_LOGIC;
+			VGADACCLOCK : out	STD_LOGIC;
+			
+			-- ##############################################################
+			--   CPU Side.
+			-- ##############################################################
+			Address 	: in   STD_LOGIC_VECTOR (5 downto 0);
+			CPUwrite	: in   STD_LOGIC;
+			DataIn	  	: in   STD_LOGIC_VECTOR (7 downto 0);
+			
+			R			: out  STD_LOGIC_VECTOR (7 downto 0);
+			G			: out  STD_LOGIC_VECTOR (7 downto 0);
+			B			: out  STD_LOGIC_VECTOR (7 downto 0);
+			HSync		: out  STD_LOGIC;
+			VSync		: out  STD_LOGIC;
+			CSync		: out  STD_LOGIC;
+			DE			: out  STD_LOGIC);
 end TestVGA;
 
 architecture Behavioral of TestVGA is
@@ -64,7 +73,7 @@ architecture Behavioral of TestVGA is
 			Blue				: out STD_LOGIC_VECTOR(4 downto 0)
 		);
 	end component;
-	
+		
     signal intHSync : std_logic := '0';
     signal intVSync : std_logic := '0';
     signal intX     : std_logic_vector(9 downto 0)  := "0000000000";
@@ -74,17 +83,21 @@ architecture Behavioral of TestVGA is
 	signal frame		: std_logic_vector(1 downto 0) := "00";
 	
 	signal clockSnes : STD_LOGIC;
-	signal CPUwrite : STD_LOGIC;
-	signal reset : STD_LOGIC;
 	signal validPix : STD_LOGIC;
 	
-	signal cpuAddress : STD_LOGIC_VECTOR(5 downto 0);
-	signal DataIn, DataOut : STD_LOGIC_VECTOR(7 downto 0);
+	signal DataOut : STD_LOGIC_VECTOR(7 downto 0);
 	
 	signal regR,regG,regB : STD_LOGIC_VECTOR(4 downto 0);
 	signal XSnes : STD_LOGIC_VECTOR(9 downto 0);
 	signal YSnes : STD_LOGIC_VECTOR(9 downto 0);
+			
 begin
+	-- #####################################################################################################
+	--
+	--   Part generating the VGA signal
+	--
+	-- #####################################################################################################
+	
 	process(clock)
 	begin
       if (clock'event) and (clock='1') then
@@ -92,7 +105,7 @@ begin
 		end if;
 	end process;
 
-	clockVGA <= clockdiv(1);
+	VGADACCLOCK <= clockdiv(1);
 	clockSnes	<= clockdiv(2);
 	XSnes	<= intX + 850;
 	YSnes	<= intY + 980;
@@ -129,33 +142,23 @@ begin
          intVSync <= '1';
       end if;	 
 
-	 if (intY = 900) then
-		CPUwrite	<= '0';
-	 else
-		CPUwrite	<= '0';
-	 end if;
-
 		-- Show pixel.
       if (intX >= 144) and (intX < 700 ) then -- Show pixel.
 			if ((intY>=0) and (intY<480)) then
 				showPixel <= '1';
-				reset <= '0';
 			else
 				showPixel <= '0';
-				reset <= '1';
 			end if;
 	   else
          showPixel <= '0';
-		reset <= '0';
       end if;
 	end process;
 	
-	--- 24 Bit
---	R <= intX(8 downto 1);
---	G <= intY(8 downto 1);
---	B <= intX(8 downto 1);
-	cpuAddress <= intX(5 downto 0);
-	DataIn <= intY(7 downto 0);
+	-- #####################################################################################################
+	--
+	--   Part embedding the PPU.
+	--
+	-- #####################################################################################################
 	
 	instanceSystem : PPU_System port map
 	(
@@ -168,10 +171,10 @@ begin
 		-- ##############################################################
 		--   CPU Side.
 		-- ##############################################################
-		Address 		=> cpuAddress,
+		Address 		=> Address,
 		CPUwrite		=> CPUwrite,
-		DataIn	  	=> DataIn,
-		DataOut	  	=> DataOut,
+		DataIn	  		=> DataIn,
+		DataOut	  		=> DataOut,
 
 		-- ##############################################################
 		--   Video output Side.
@@ -182,7 +185,7 @@ begin
 	);
 
 	-- 5 Bit --> 8 Bit
-	process(XSnes)
+	process(XSnes, regR, regG, regB, showPixel)
 	begin
 		if (XSnes >= 0) and (XSnes <= 511) then
 			R <= regR & regR(4 downto 2);
