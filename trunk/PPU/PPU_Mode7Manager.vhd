@@ -36,7 +36,8 @@ entity PPU_Mode7Manager is
 		
 		R211F_M7CX			: in STD_LOGIC_VECTOR(12 downto 0);
 		R2120_M7CY			: in STD_LOGIC_VECTOR(12 downto 0);
-		
+
+		-- Integer format.
 		Mode7XOut			: out STD_LOGIC_VECTOR(20 downto 0);
 		Mode7YOut			: out STD_LOGIC_VECTOR(20 downto 0)
 	);
@@ -47,25 +48,26 @@ end PPU_Mode7Manager;
 ----------------------------------------------------------------------------------
 
 architecture ArchiPPU_Mode7Manager of PPU_Mode7Manager is
-	component PPU_Mode7Incr is
-    Port (
-		clock		: in  STD_LOGIC;
-		
-		-- 10.8 Format.
-		load		: in STD_LOGIC;
-		inc			: in STD_LOGIC;
-		LoadX		: in STD_LOGIC_VECTOR(26 downto 0);
-		LoadY		: in STD_LOGIC_VECTOR(26 downto 0);
-		
-		--  8.8 Format. 
-		M7_A 		: in STD_LOGIC_VECTOR(15 downto 0);
-		M7_C 		: in STD_LOGIC_VECTOR(15 downto 0);
-		
-		-- 10.8 Format.
-		TX			: out STD_LOGIC_VECTOR(26 downto 0);
-		TY			: out STD_LOGIC_VECTOR(26 downto 0)
-	);
-	end component;
+
+--	component PPU_Mode7Incr is
+--    Port (
+--		clock		: in  STD_LOGIC;
+--		
+--		-- 10.8 Format.
+--		load		: in STD_LOGIC;
+--		inc			: in STD_LOGIC;
+--		LoadX		: in STD_LOGIC_VECTOR(26 downto 0);
+--		LoadY		: in STD_LOGIC_VECTOR(26 downto 0);
+--		
+--		--  8.8 Format. 
+--		M7_A 		: in STD_LOGIC_VECTOR(15 downto 0);
+--		M7_C 		: in STD_LOGIC_VECTOR(15 downto 0);
+--		
+--		-- 10.8 Format.
+--		TX			: out STD_LOGIC_VECTOR(26 downto 0);
+--		TY			: out STD_LOGIC_VECTOR(26 downto 0)
+--	);
+--	end component;
 
 	component PPU_Mode7StartLine is
     Port (
@@ -103,38 +105,35 @@ architecture ArchiPPU_Mode7Manager of PPU_Mode7Manager is
 	signal finalTX,finalTY	: STD_LOGIC_VECTOR(28 downto 0);
 	
 begin
-	process(lineStart)
-	begin
-		sLoad	<= lineStart;
-		sInc	<= not(lineStart);
-	end process;
-
 	-- TODO A : BAD : mosaic is flipped also...
 	-- TODO B : sScreenY <-- NEED NEXT LINE Y AND HANDLE FLIPY,
 	-- but we MUST take care about MOSAIC (+1 is not a solution)
 	-- --> Have mosaic output 2 Y bit --> update currentY, nextY.
 	--
-	process (R211A_M7_VFLIP, YMosaic)
-	begin
-		if (R211A_M7_VFLIP = '1') then
-			sScreenY <= "11" & not(YMosaic);
-		else
-			sScreenY <= "00" & YMosaic;
-		end if;
-	end process;
-	
-	process (R211A_M7_HFLIP,R211B_M7A,R211D_M7C)
-	begin
-		if (R211A_M7_HFLIP = '1') then
-			sMA <= not(R211B_M7A) + 1;
-			sMC <= not(R211D_M7C) + 1;
-			sScreenX	<= "0011111111"; -- 255
-		else
-			sMA <= R211B_M7A;
-			sMC <= R211D_M7C;
-			sScreenX	<= "0000000000"; -- 0
-		end if;
-	end process;
+--	process (R211A_M7_VFLIP, YMosaic)
+--	begin
+--		if (R211A_M7_VFLIP = '1') then
+--			sScreenY <= "11" & not(YMosaic);
+--		else
+--			sScreenY <= "00" & YMosaic;
+--		end if;
+--	end process;
+--	
+--	process (R211A_M7_HFLIP,R211B_M7A,R211D_M7C)
+--	begin
+--		if (R211A_M7_HFLIP = '1') then
+--			sMA <= not(R211B_M7A) + 1;
+--			sMC <= not(R211D_M7C) + 1;
+--			sScreenX	<= "0011111111"; -- 255
+--		else
+--			sMA <= R211B_M7A;
+--			sMC <= R211D_M7C;
+--			sScreenX	<= "0000000000"; -- 0
+--		end if;
+--	end process;
+
+	sScreenX	<= "00" & X_NonMosaic;
+	sScreenY	<= "00" & YMosaic;
 	
 	instancePPU_Mode7StartLine : PPU_Mode7StartLine port map
 	(
@@ -156,26 +155,33 @@ begin
 		TY			=> sTY
 	);
 	
-	instancePPU_PPU_Mode7Incr : PPU_Mode7Incr port map
-	(
-		clock		=> clock,
-		
-		-- 10.8 Format.
-		load		=> sLoad,
-		inc			=> sInc,
-		LoadX		=> sTX(26 downto 0),
-		LoadY		=> sTY(26 downto 0),
-		
-		--  8.8 Format. 
-		M7_A 		=> sMA,
-		M7_C 		=> sMC,
-		
-		-- 10.8 Format.
-		TX			=> finalTX(26 downto 0),
-		TY			=> finalTY(26 downto 0)
-	);
+--	instancePPU_PPU_Mode7Incr : PPU_Mode7Incr port map
+--	(
+--		clock		=> clock,
+--		
+--		-- 10.8 Format.
+--		load		=> sLoad,
+--		inc			=> sInc,
+--		LoadX		=> sTX(26 downto 0),
+--		LoadY		=> sTY(26 downto 0),
+--		
+--		--  8.8 Format. 
+--		M7_A 		=> sMA,
+--		M7_C 		=> sMC,
+--		
+--		-- 10.8 Format.
+--		TX			=> finalTX(26 downto 0),
+--		TY			=> finalTY(26 downto 0)
+--	);
 	
-	Mode7XOut <= finalTX(28 downto 8);
-	Mode7YOut <= finalTY(28 downto 8);
+
+	--
+	-- Output 20.0 Format.
+	--
+	Mode7XOut <= sTX(28 downto 8);
+	Mode7YOut <= sTY(28 downto 8);
 	
+	-- Constant step for debugging purpose.
+--	Mode7XOut <= "0000000000000" & X_NonMosaic;
+--	Mode7YOut <= "0000000000000" & YMosaic;
 end ArchiPPU_Mode7Manager;

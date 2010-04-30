@@ -303,7 +303,6 @@ architecture PPU_PixelFetch of PPU_PixelFetch is
 	signal sVRAMAddressPair : STD_LOGIC_VECTOR(14 downto 0);
 	signal sVRAMRead : STD_LOGIC;
 	signal Mode7Out,Prev2Mode7Out,PrevMode7Out  : STD_LOGIC;
-	signal PrevTileValue	: STD_LOGIC_VECTOR(7 downto 0);
 	signal PrevMode7X,PrevMode7Y : STD_LOGIC_VECTOR(2 downto 0);
 	
 	----------------------------------------------------------
@@ -448,7 +447,6 @@ begin
 			Mode7Y,
 			R211A_M7_REPEAT,
 			R211A_M7_FILL,
-			PrevTileValue,
 			PrevMode7Y,
 			PrevMode7X)
 	begin
@@ -471,13 +469,14 @@ begin
 			end if;
 			
 			if (Mode7Out='1' and R211A_M7_REPEAT='1' and R211A_M7_FILL='1') then
-				VRAMAddressPair		<= '0' & Mode7Y(9 downto 3) & Mode7X(9 downto 3);
-			else
 				-- Force Tile 0.
 				VRAMAddressPair		<= "000000000000000";
+			else
+				-- TODO : we are handling the map loop / map normal case, but remain the FILL WITH COLOR TRANSPARENT case here.
+				VRAMAddressPair		<= '0' & Mode7Y(9 downto 3) & Mode7X(9 downto 3);
 			end if;
 			
-			VRAMAddressImpair	<= '0' & PrevTileValue & PrevMode7Y & PrevMode7X;
+			VRAMAddressImpair	<= '0' & VRAMDataPair & PrevMode7Y & PrevMode7X;
 			VRAMRead			<= '1';
 		end if;
 	end process;
@@ -487,9 +486,8 @@ begin
 		if (clock'event and clock = '1') then 
 			PrevMode7X		<= Mode7X(2 downto 0);
 			PrevMode7Y		<= Mode7Y(2 downto 0);
-			Prev2Mode7Out	<= PrevMode7Out;	-- Pipe 2
-			PrevMode7Out	<= Mode7Out;		-- Pipe 1
-			PrevTileValue	<= VRAMDataPair;
+			Prev2Mode7Out	<= PrevMode7Out;	-- Pipe 2 : Need tile info when pixel has been read.
+			PrevMode7Out		<= Mode7Out;			-- Pipe 1
 		end if;
 	end process;
 	
@@ -1210,7 +1208,7 @@ begin
 			end case;
 		else
 			if (Prev2Mode7Out='1' and R211A_M7_REPEAT='1' and R211A_M7_FILL='0') then
-				BG1Pix <= "00000000";
+				BG1Pix <= "00000000"; -- SEE UPPER TODO : is this case really transparent color ? TO CHECK.
 			else
 				BG1Pix <= VRAMDataImpair;
 			end if;
@@ -1264,12 +1262,6 @@ begin
 				BG4Pix)
 	begin
 		if (clock'event and clock = '1') then
---case ScreenY_NonMosaic(6 downto 5) is
---when "00" =>
---
--- Normal BG Stuff.
---
-
 			if (MosaicXSig = '1' or R2106_BGMosaicEnable(3)='0') then
 				regBG4Pix			<= BG4Pix;
 				regPalPrioBlock(3)	<= palPrioBlock(3); -- Prio BG 4.
@@ -1293,37 +1285,6 @@ begin
 				regPalPrioBlock(0)	<= palPrioBlock(0); -- Prio BG 1.
 				regPalPrioBlock(6 downto 4)	<= palPrioBlock(6 downto 4); -- Pal BG 1.
 			end if;
---when "01" =>
---
--- State Counter.
---
---regBG4Pix <= "00";
---regBG3Pix <= "00";
---regBG2Pix <= r1Counter & '0';
---regBG1Pix <= "00000000";
---regPalPrioBlock(15 downto 0)	<= "0000000000000000";
---
---when "10" =>
-----
----- Reg Storage
-----
---regBG4Pix <= "00";
---regBG3Pix <= "00";
---regBG2Pix <= regNumber;
---regBG1Pix <= "00000000";
---regPalPrioBlock(15 downto 0)	<= "0000000000000000";
---
---when others =>
-----
----- Bank Select
-----
---regBG4Pix <= "00";
---regBG3Pix <= "00";
---regBG2Pix <= sVRAMAddressPair(3 downto 0);
---regBG1Pix <= "00000000";
---regPalPrioBlock(15 downto 0)	<= "0000000000000000";
---end case;
---
 		end if;
 	end process;
 	
@@ -1364,17 +1325,15 @@ begin
 			when CONSTANTS.MODE5  =>
 			-- 5 : xx11 11xx xx22 <- 
 				LineCacheData(27 downto 16) <= "00" & regBG1Pix(3 downto 0) & "0000" & regBG2Pix(1 downto 0);
-			when CONSTANTS.MODE6  =>
+			when others => -- CONSTANTS.MODE6 but mode7 which never happen here.
 			-- 6 : xx11 11xx xxxx
 				LineCacheData(27 downto 16) <= "00" & regBG1Pix(3 downto 0) & "000000";
-			when others =>
-			-- 7 : 1111 1111 xxxx			
-				LineCacheData(27 downto 16) <= regBG1Pix(7 downto 6) & regBG1Pix(3 downto 0) & regBG1Pix(5 downto 4) & "0000";
 			end case;
 
 			tmpFuckX_ShitVHDL_Fuckinglanguage_stupid_simulation := XCounter + CONSTANTS.OFFSETX_TO0; -- +494 => 0 when X = 17 + 1(Pipe mosaic)
 		else
 			LineCacheData(15 downto 0)	<= "0000000000000000"; -- No palette, prio is handled in BGLineDecoded directly.
+			-- 7 : 1111 1111 xxxx			
 			LineCacheData(27 downto 16) <= regBG1Pix(7 downto 6) & regBG1Pix(3 downto 0) & regBG1Pix(5 downto 4) & "0000";
 			tmpFuckX_ShitVHDL_Fuckinglanguage_stupid_simulation := XCounter + CONSTANTS.OFFSETXMODE7_TO0; -- +509 => 0 when X = 2 + 1(Pipe mosaic + Read Mode 7 start) 
 		end if;

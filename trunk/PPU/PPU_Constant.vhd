@@ -58,7 +58,7 @@ package CONSTANTS is
 	constant VISIBLEX			: integer := 287;
 	constant VISIBLEY			: integer := 447;
 	
-	constant OFFSETXMODE7_TO0	: STD_LOGIC_VECTOR := x"1FE"; -- X + Offset = 0 when X = 2
+	constant OFFSETXMODE7_TO0	: STD_LOGIC_VECTOR := x"1FC"; -- X + Offset = 0 when X = 3
 end CONSTANTS;
 
 --package PIXFCTE is
