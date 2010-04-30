@@ -1327,7 +1327,8 @@ begin
 		end if;
 	end process;
 	
-	process(	ScreenX_NonMosaic,
+	process(	XCounter,
+				ScreenX_NonMosaic,
 				R2105_BGMode,
 				mode7,
 				regPalPrioBlock,

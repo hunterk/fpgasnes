@@ -820,7 +820,9 @@ begin
 			sCGRAMDataWriteFromRegisters,
 			sCGRAMWriteSigFromRegisters,
 			readOnlyDataCGRAM,
-			sPaletteMainReadAdr )
+			sPaletteMainReadAdr,
+			NormalX, NormalY, R2100_DisplayDisabled
+			)
 	begin
 		--
 		-- Find the region.
