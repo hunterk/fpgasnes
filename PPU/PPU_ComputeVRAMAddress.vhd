@@ -651,6 +651,7 @@ begin
 		variable charR				: STD_LOGIC_VECTOR(11 downto 0);
 		variable lChar,lChar2		: STD_LOGIC_VECTOR(9 downto 0);
 		variable pixY				: STD_LOGIC_VECTOR(2 downto 0);
+		variable force16PixelTile	: STD_LOGIC;
 	begin
 		--
 		-- Select X,Y at left tile coordinate based on BG mode.
@@ -745,11 +746,17 @@ begin
 					coordYF2	:= coordY;
 --				end if;
 --			end if;
+
+			if (R2105_BGMode="110" or R2105_BGMode="101") then
+				force16PixelTile := '1';
+			else
+				force16PixelTile := '0';
+			end if;
 			
 			--
 			-- Compute Mirroring
 			--
-			TileXCondOut <= coordXF2(3) and (tileSize or R2105_BGMode(2));
+			TileXCondOut <= coordXF2(3) and (tileSize or force16PixelTile);
 			TileYCondOut <= coordYF2(3) and  tileSize;
 			
 			--
@@ -757,7 +764,7 @@ begin
 			--
 			
 			-- Force 16 pixel for mode 5/6.(7 used a different path : no problem)
-			if (TileSize = '1' or R2105_BGMode(2)='1') then
+			if (TileSize = '1' or force16PixelTile='1') then	-- Mode 6 or 5 Force.
 				TileCoordX <= coordXF2(9 downto 4);
 			else
 				TileCoordX <= coordXF2(8 downto 3);
