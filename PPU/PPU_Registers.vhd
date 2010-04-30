@@ -998,7 +998,6 @@ begin
 	R2130_CLIPCOLORMATH		 <= reg30_CLIPCOLORMATH;
 	R2130_PREVENTCOLORMATH	 <= reg30_PREVENTCOLORMATH;
 	R2130_ADDSUBSCR			 <= reg30_ADDSUBSCR;
-	R2130_DIRECTCOLOR		 <= reg30_DIRECTCOLOR;
 
 	R2131_COLORMATH_SUB		 <= reg31_COLORMATH_SUB;
 	R2131_COLORMATH_HALF	 <= reg31_COLORMATH_HALF;
@@ -1017,15 +1016,34 @@ begin
 	
 	process (reg05_BGMode, reg2C_MAIN, reg2D_SUB, reg33_M7_EXTBG)
 	begin
+		--
+		-- True color mode available ONLY when BG1 is in 256 color mode.
+		--
 		case (reg05_BGMode) is
-		when "000" => tmpValue <= "1111";
-		when "001" => tmpValue <= "0111";
-		when "010" => tmpValue <= "0011";
-		when "011" => tmpValue <= "0011";
-		when "100" => tmpValue <= "0011";
-		when "101" => tmpValue <= "0011";
-		when "110" => tmpValue <= "0011";
-		when others => tmpValue <= "00" & reg33_M7_EXTBG &'1';
+		when "000" =>
+			tmpValue <= "1111";
+			R2130_DIRECTCOLOR		 <= '0';
+		when "001" =>
+			tmpValue <= "0111";
+			R2130_DIRECTCOLOR		 <= '0';
+		when "010" =>
+			tmpValue <= "0011";
+			R2130_DIRECTCOLOR		 <= '0';
+		when "011" =>
+			tmpValue <= "0011";
+			R2130_DIRECTCOLOR		 <= reg30_DIRECTCOLOR;
+		when "100" =>
+			tmpValue <= "0011";
+			R2130_DIRECTCOLOR		 <= reg30_DIRECTCOLOR;
+		when "101" =>
+			tmpValue <= "0011";
+			R2130_DIRECTCOLOR		 <= '0';
+		when "110" =>
+			tmpValue <= "0011";
+			R2130_DIRECTCOLOR		 <= '0';
+		when others =>
+			tmpValue <= "00" & reg33_M7_EXTBG &'1';
+			R2130_DIRECTCOLOR		 <= reg30_DIRECTCOLOR;			
 		end case;
 		
 		--
