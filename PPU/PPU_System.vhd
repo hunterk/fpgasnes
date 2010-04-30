@@ -842,7 +842,8 @@ begin
 		--
 		-- VRAM Arbitration.
 		--
-		if (visibleX='1' and visibleY='1' and R2100_DisplayDisabled='0') then
+		-- TODO : now for testing arbitration give higher priority to CPU WRITE and PPU VRAM access.
+		if (visibleX='1' and visibleY='1' and R2100_DisplayDisabled='0' and CPUwrite='0') then
 			--- INSIDE SCREEN     ---
 			--=======================
 			VRAMWrite					<= '0';
@@ -928,7 +929,7 @@ begin
 		
 		lineStart			=> startline,
 		X_NonMosaic			=> NormalX(7 downto 0),
-		YMosaic				=> YMosaic(8 downto 1),
+		YMosaic				=> NormalY(8 downto 1), -- TODO : Not always YMosaic in this case... depends on BG selected also.
 		
 		R210D_M7_HOFS		=> R210D_M7_HOFS,
 		R210E_M7_VOFS		=> R210E_M7_VOFS,

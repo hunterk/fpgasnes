@@ -56,39 +56,47 @@ end PPU_Mode7StartLine;
 ----------------------------------------------------------------------------------
 
 architecture PPU_Mode7StartLine of PPU_Mode7StartLine is
-	signal CLX			: STD_LOGIC_VECTOR	(12 downto 0);
-	signal CLY			: STD_LOGIC_VECTOR	(12 downto 0);
+	signal CLX			: STD_LOGIC_VECTOR	(14 downto 0);
+	signal CLY			: STD_LOGIC_VECTOR	(14 downto 0);
+	signal invCX		: STD_LOGIC_VECTOR	(14 downto 0);
+	signal invCY		: STD_LOGIC_VECTOR	(14 downto 0);
 
 	signal M7A_signed	: signed			(M7_A'high downto 0);
 	signal M7B_signed	: signed			(M7_B'high downto 0);
 	signal M7C_signed	: signed			(M7_C'high downto 0);
 	signal M7D_signed	: signed			(M7_D'high downto 0);
 
-	signal sScreenY		: signed			(ScreenY'high downto 0);
-
-	signal sCLX			: signed			(12 downto 0);
-	signal sCLY			: signed			(12 downto 0);
+	signal sCLX			: signed			(14 downto 0);
+	signal sCLY			: signed			(14 downto 0);
 	
-	signal tmp1X		: signed			(28 downto 0);
-	signal tmp1Y		: signed			(28 downto 0);
+	signal tmp1X		: signed			(30 downto 0);
+	signal tmp1Y		: signed			(30 downto 0);
 
-	signal tmp2X		: signed			(25 downto 0);
-	signal tmp2Y		: signed			(25 downto 0);
+	signal tmp2X		: signed			(30 downto 0);
+	signal tmp2Y		: signed			(30 downto 0);
 
-	signal tmp3X		: signed			(28 downto 0);
-	signal tmp3Y		: signed			(28 downto 0);
-
-	signal outX			: STD_LOGIC_VECTOR	(28 downto 0);
-	signal outY			: STD_LOGIC_VECTOR	(28 downto 0);
+	signal outX			: STD_LOGIC_VECTOR	(30 downto 0);
+	signal outY			: STD_LOGIC_VECTOR	(30 downto 0);
 begin
-	-- 13 bit.
-	-- CL* = Off* - C*
-	CLX			<= M7_OFFSX + not(M7_CX) + 1;
-	CLY			<= M7_OFFSY + not(M7_CY) + 1;
-
+	--
+	-- Full Matrix computation : do not want to bother with computation optimisation, will use full multiplier here,
+	-- and perform matrix complete calculation
+	--
+	-- tmpX = SX + M7HOFS - CX
+	-- tmpY = SY + M7VOFS - CY
+	--
+	-- TX = (A * tmpX) + (B * tmpY) + CX
+	-- TY = (C * tmpX) + (D * tmpY) + CY
+	--
+	
+	-- 10.0(unsigned) + 13.0(signed) + 13.0(signed)
+	invCX		<= (not(M7_CX(12)) & not(M7_CX(12)) & not(M7_CX)) + 1;
+	invCY		<= (not(M7_CY(12)) & not(M7_CY(12)) & not(M7_CY)) + 1;
+	CLX			<= ("00000" & ScreenX) + (M7_OFFSX(12) & M7_OFFSX(12) & M7_OFFSX) + (invCX);
+	CLY			<= ("00000" & ScreenY) + (M7_OFFSY(12) & M7_OFFSY(12) & M7_OFFSY) + (invCY);
+	
 	sCLX		<= signed(CLX);
 	sCLY		<= signed(CLY);
-	sScreenY	<= signed(ScreenY);
 	
 	-- 16 bit.
 	M7A_signed	<= signed(M7_A);
@@ -98,21 +106,24 @@ begin
 
 	-- TODO : ScreenX also : needed for FlipX in Mode7.
 	
-	tmp1X		<= M7A_signed * sCLX;		-- 16 + 13
-	tmp2X		<= M7B_signed * sScreenY;	-- 16 + 10
-	tmp3X		<= M7B_signed * sCLY;		-- 16 + 13
+	tmp1X		<= M7A_signed * sCLX;		-- 8.8 * 15.0 => 23.8
+	tmp1Y		<= M7B_signed * sCLY;		-- 8.8 * 15.0 => 23.8
 	
-	tmp1Y		<= M7C_signed * sCLX;		-- 16 + 13
-	tmp2Y		<= M7D_signed * sScreenY;	-- 16 + 10
-	tmp3Y		<= M7D_signed * sCLY;		-- 16 + 13
+	tmp2X		<= M7C_signed * sCLX;		-- 8.8 + 15.0 => 23.8 (31 bit)
+	tmp2Y		<= M7D_signed * sCLY;		-- 8.8 + 15.0 => 23.8 (31 bit)
 
-	-- Full Accuracy implementation.
-	-- => SNES Accuracy is equiv to set all the 5..0 bit of mul result to ZERO. (= simplify mul unit)
-	outX		<= STD_LOGIC_VECTOR(tmp1X) + (STD_LOGIC_VECTOR(tmp2X) & "000") + STD_LOGIC_VECTOR(tmp3X) + ("00000000" & M7_CX & "00000000");
-	outY		<= STD_LOGIC_VECTOR(tmp1Y) + (STD_LOGIC_VECTOR(tmp2Y) & "000") + STD_LOGIC_VECTOR(tmp3Y) + ("00000000" & M7_CY & "00000000");
+	-- Full Accuracy implementation for now (see anomie's doc)
+	--             23.8                      23.8                      23.8 (13.8
+	outX		<= STD_LOGIC_VECTOR(tmp1X) + STD_LOGIC_VECTOR(tmp1Y) + (M7_CX(12) & M7_CX(12) & M7_CX(12) & M7_CX(12) & M7_CX(12) &
+																		M7_CX(12) & M7_CX(12) & M7_CX(12) & M7_CX(12) & M7_CX(12) &
+																		M7_CX & "00000000");
+																		
+	outY		<= STD_LOGIC_VECTOR(tmp2X) + STD_LOGIC_VECTOR(tmp2Y) + (M7_CY(12) & M7_CY(12) & M7_CY(12) & M7_CY(12) & M7_CY(12) &
+																		M7_CY(12) & M7_CY(12) & M7_CY(12) & M7_CY(12) & M7_CY(12) &
+																		M7_CY & "00000000");
 
 	-- 10.8
-	TX			<= outX;
-	TY			<= outY;
+	TX			<= outX(28 downto 0);
+	TY			<= outY(28 downto 0);
 
 end PPU_Mode7StartLine;
