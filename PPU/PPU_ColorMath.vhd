@@ -33,16 +33,16 @@ end PPU_ColorMath;
 
 architecture PPU_ColorMath of PPU_ColorMath is
 	signal source2				: std_logic_vector(4 downto 0);
-	signal source2PostOp		: std_logic_vector(5 downto 0);
-	signal resultBeforeShift	: std_logic_vector(5 downto 0);
-	signal resultAfterShift		: std_logic_vector(5 downto 0);
+	signal source2PostOp		: std_logic_vector(6 downto 0);
+	signal resultBeforeShift	: std_logic_vector(6 downto 0);
+	signal resultAfterShift		: std_logic_vector(6 downto 0);
 	
 	signal Ro : std_logic;
 	signal Rs : std_logic;
 
-	signal s1	: std_logic_vector(5 downto 0);
-	signal s2	: std_logic_vector(5 downto 0);
-	signal s3	: std_logic_vector(5 downto 0);
+	signal s1	: std_logic_vector(6 downto 0);
+	signal s2	: std_logic_vector(6 downto 0);
+	signal s3	: std_logic_vector(6 downto 0);
 begin
 	--
 	-- Select Source
@@ -51,16 +51,16 @@ begin
 	
 	--
 	-- Add / Sub
-	-- 5 bit -> 6 Bit
+	-- 5 bit -> 7 Bit
 	process (source2, AddSub, s2, s1)
-	variable slocal : STD_LOGIC_VECTOR(5 downto 0);
+	variable slocal : STD_LOGIC_VECTOR(6 downto 0);
 	begin
-		s2 <= ("1" & not(source2));
+		s2 <= ("11" & not(source2));
 		slocal := s2 + 1;
 		if (AddSub = '1') then  -- SUB
 			s1 <= slocal;
 		else
-			s1 <= "0" & source2; -- ADD
+			s1 <= "00" & source2; -- ADD
 		end if;
 		
 		source2PostOp <= s1;
@@ -71,7 +71,7 @@ begin
 	-- 5 Bit -> 6 Bit.
 	process (InputA, source2PostOp, s3)
 	begin
-		s3 <= ('0' & InputA);
+		s3 <= ("00" & InputA);
 		resultBeforeShift <= s3 + source2PostOp;
 	end process;
 
@@ -81,7 +81,7 @@ begin
 	process (resultBeforeShift, Div2)
 	begin
 		if (Div2 = '1') then
-			resultAfterShift <= resultBeforeShift(5) & resultBeforeShift(5 downto 1);
+			resultAfterShift <= resultBeforeShift(6) & resultBeforeShift(6 downto 1);
 		else
 			resultAfterShift <= resultBeforeShift;
 		end if;
@@ -110,8 +110,8 @@ begin
 		--  1 0    0   |   1    -->     1
 		--  1 1    0   |   0    -->     0
 		--
-		Ro <= not(resultAfterShift(5));
-		Rs <= resultAfterShift(5) and (not(source2PostOp(5)));
+		Ro <= not(resultAfterShift(6));				-- 0 if underflow.
+		Rs <= resultAfterShift(5) and not(AddSub);	-- 1 if  overflow when doing addition. (Add=0)
 		
 		Output <= (resultAfterShift(4 downto 0) and (Ro&Ro&Ro&Ro&Ro)) or (Rs&Rs&Rs&Rs&Rs);
 	end process;

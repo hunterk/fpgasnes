@@ -1,0 +1,35 @@
+* Fix mode 7 and complete test
+	- FlipH/V
+	- Fill loop.
+	- Transform beeing correct.
+	- Mosaic (including FLIP)
+	- See interlace support.
+	
+	--> Use screen shot from Axelay with monster (transform/fill)
+	--> Use screen shot from Act Raiser (transform/fill)
+	--> Patch register and look how it is with emulator. -> flip/fill
+
+* Finish blending between BG1/2/3/4
+	- Color window clip.
+	- Color math
+	
+* Obj clipping window logic.
+
+* Mosaic support for weird mode X,Y in mode 7 (BG 1)
+
+* Tile Offset Mode
+
+* Interlace
+	- Mode7
+	- Sprite
+	- Other mode
+	
+* HiRes
+	- Mode 7 ? FlipH/V
+	- Sprites ? (Doubled ?)
+	
+* Sprites
+
+* Register interface
+	- Implement sprites (OAM)
+	- Implement CGRAM / VRAM.
