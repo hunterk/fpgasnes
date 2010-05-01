@@ -929,7 +929,7 @@ begin
 		
 		lineStart			=> startline,
 		X_NonMosaic			=> NormalX(7 downto 0),
-		YMosaic				=> NormalY(8 downto 1), -- TODO : Not always YMosaic in this case... depends on BG selected also.
+		YMosaic				=> NormalY(7 downto 0), -- TODO : Not always YMosaic in this case... depends on BG selected also.
 		
 		R210D_M7_HOFS		=> R210D_M7_HOFS,
 		R210E_M7_VOFS		=> R210E_M7_VOFS,

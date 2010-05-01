@@ -34,6 +34,7 @@ architecture PPUBGTileAdress of PPUBGTileAdress is
 	signal AdrUp				: std_logic_vector(6 downto 0);
 	signal XD : std_logic;
 	signal YD : std_logic;
+	signal relAdr: STD_LOGIC_VECTOR(11 downto 0);
 begin
 	--
 	-- Create Adress HIGH
@@ -52,19 +53,25 @@ begin
 	-- Compute Flags
 	--
 	process (TileCoordX,TileCoordY,SX,SY)
+		variable adrsFormat : STD_LOGIC_VECTOR(1 downto 0);
 	begin
-		YD <=  TileCoordY(5) and SY and SX;
-		XD <= (TileCoordY(5) and SY and not(SX)) or (TileCoordX(5) and SX);
+		adrsFormat := SY & SX;
+		
+		case adrsFormat is
+		when "00" =>
+			relAdr <= "00"                                & TileCoordY(4 downto 0) & TileCoordX(4 downto 0);
+		when "01" =>
+			relAdr <= "0" & TileCoordX(5)                 & TileCoordY(4 downto 0) & TileCoordX(4 downto 0);
+		when "10" =>
+			relAdr <= "0" & TileCoordY(5)                 & TileCoordY(4 downto 0) & TileCoordX(4 downto 0);
+		when others => -- "11"
+			relAdr <=       TileCoordY(5) & TileCoordX(5) & TileCoordY(4 downto 0) & TileCoordX(4 downto 0);
+		end case;
 	end process;
 
 	--
-	-- Compute Upper Part.
+	-- Compute Base Adress + Offset.
 	--
-	process (BGTileMapBase,XD,YD, TileCoordY)
-	begin
-		AdrUp <= (BGTileMapBase & '0') + ("0000" & YD & XD & TileCoordY(4));
-	end process;
-	-- 7 Bit / 9 Bit
-	BGTileAdr <= AdrUp(5 downto 0) & TileCoordY(3 downto 0) & TileCoordX(4 downto 0);
+	BGTileAdr <= (BGTileMapBase(4 downto 0) & "0000000000") + ("000" & relAdr);	
 	
 end PPUBGTileAdress;
