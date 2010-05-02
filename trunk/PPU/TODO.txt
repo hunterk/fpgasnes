@@ -1,5 +1,5 @@
 * Fix mode 7 and complete test
-	- FlipH/V
+	- FlipH/V.
 	- Fill loop.
 	- Transform beeing correct.
 	- Mosaic (including FLIP)
@@ -10,8 +10,8 @@
 	--> Patch register and look how it is with emulator. -> flip/fill
 
 * Finish blending between BG1/2/3/4
-	- Color window clip.
-	- Color math
+	- Color window clip. / CGWSEL (0x30 cc mm)
+	- Color math.
 	
 * Obj clipping window logic.
 
@@ -29,7 +29,32 @@
 	- Sprites ? (Doubled ?)
 	
 * Sprites
+	- Tile unit X computation for display most unlikely correct.
 
 * Register interface
 	- Implement sprites (OAM)
 	- Implement CGRAM / VRAM.
+
+============================
+Sprite support :
+- 0x01 : Sprite size / Name Select / Base Select
+- OAM Table read
+	x,y,char,v/h/pal/prio/Bank/size
+
+
+	4x 128*8 bit + 1x 32*8 bit
+
+	Input is using nintendo specs:
+
+	Output as 34 bit record for each sprite.
+
+	Unit A : output sprite record. (active sprite)
+		
+	Unit B : Count the sprites.
+	Unit C : Return if a sprite is visible or not.
+	Unit D : Increment and load each sprite
+		=> Maintain sprite counter overflow.
+		=> Main tile counter 
+	
+Dump :
+- OAM Table read/write -> Simulate all sprite write.

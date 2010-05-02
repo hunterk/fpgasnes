@@ -3,9 +3,10 @@
 -- Design Name:		PPU_SpriteUnit.vhd
 -- Module Name:		PPU_SpriteUnit
 --
--- Description: 	
+-- Description:
 --	Tile loading order / pixel order is done by sprite loader unit.
---  This unit just display continously 64 pix max per sprite.
+--  This unit just display continously 8 pixel for one tile.
+-- TODO : X Computation not correct (not likely matching specs)
 ----------------------------------------------------------------------------------
 
 library IEEE;
@@ -16,120 +17,96 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity PPU_SpriteUnit is
 	port (
-		clock			: in	STD_LOGIC;
-		bankSwap		: in	STD_LOGIC;
+		clock				: in	STD_LOGIC;
+		loadBank		: in	STD_LOGIC;
 		
 		--
 		-- Loading Side.
 		--
 		writeE			: in	STD_LOGIC;
-		SpriteAddrWR	: in	STD_LOGIC;
+		hiBPP				: in	STD_LOGIC;
 		wordIn	 		: in	STD_LOGIC_VECTOR(15 downto 0);
-		storeX			: in	STD_LOGIC;
-		storePal_Prio	: in	STD_LOGIC;
+		storeAll			: in	STD_LOGIC;
 		PalIn_Prio		: in	STD_LOGIC_VECTOR( 4 downto 0);  -- OOPPP 
-		X				: in	STD_LOGIC_VECTOR( 8 downto 0);	-- TODO : Sprite on 256 pix even in Hi-Res ? 
+		X					: in	STD_LOGIC_VECTOR( 8 downto 0);	-- TODO : Sprite on 256 pix even in Hi-Res ? 
 
 		--
 		-- Rendering Side.
 		--
 		CurrentX		: in	STD_LOGIC_VECTOR( 7 downto 0);
-		pixel			: out	STD_LOGIC_VECTOR( 3 downto 0);
+		pixel				: out	STD_LOGIC_VECTOR( 3 downto 0);
 		pal				: out	STD_LOGIC_VECTOR( 2 downto 0);
-		prio			: out	STD_LOGIC_VECTOR( 1 downto 0);
+		prio				: out	STD_LOGIC_VECTOR( 1 downto 0);
 		isValid			: out	STD_LOGIC
 	);
 end entity PPU_SpriteUnit;
 
 architecture ArchPPU_SpriteUnit of PPU_SpriteUnit is
 	
---	component SpriteRam is
---		Port ( 	
---			clock			: in  STD_LOGIC;
---			data			: in  STD_LOGIC_VECTOR(15 DOWNTO 0);
---			address			: in  STD_LOGIC_VECTOR(2 DOWNTO 0);
---
---			we				: in  STD_LOGIC;
---			q				: out STD_LOGIC_VECTOR(15 DOWNTO 0)
---		);
---	end component;
-	
-	signal	-- B1LData,
+	signal	
+			B0LDataOut,
 			B1LDataOut,
-			-- B2LData,
-			B2LDataOut,
-			-- B1HData,
+			B0HDataOut,
 			B1HDataOut,
-			-- B2HData,
-			B2HDataOut,
 			pixLo, pixHi : STD_LOGIC_VECTOR(15 DOWNTO 0);
 
---	signal	B1LAddress,B2LAddress,B1HAddress,B2HAddress	: STD_LOGIC_VECTOR(2 DOWNTO 0);
-	signal	B1LWEnable,B2LWEnable,B1HWEnable,B2HWEnable	: STD_LOGIC;
+	signal	B0LWEnable,B1LWEnable,B0HWEnable,B1HWEnable	: STD_LOGIC;
 	
 	signal	sPixel		: STD_LOGIC_VECTOR(3 downto 0);
-	signal  DX			: STD_LOGIC_VECTOR(7 downto 0);
-	signal  regStartX	: STD_LOGIC_VECTOR(8 downto 0);
+	signal  DX			: STD_LOGIC_VECTOR(8 downto 0);
+	signal  reg0StartX,reg1StartX	: STD_LOGIC_VECTOR(8 downto 0);
 
-	signal  regPal_Prio	: STD_LOGIC_VECTOR(4 downto 0);
+	signal  reg0Pal_Prio,reg1Pal_Prio	: STD_LOGIC_VECTOR(4 downto 0);
+
 begin
-	--
-	-- Store Start X.
-	--
-	process(clock, X, storeX, X, storePal_Prio, PalIn_Prio)
-	begin
-		if rising_edge(clock) then
-			if (storeX = '1') then
-				regStartX <= X;
-			end if;
-			
-			if (storePal_Prio = '1') then
-				regPal_Prio <= PalIn_Prio;
-			end if;
-		end if;
-	end process;
-	
-	pal		<= regPal_Prio(2 downto 0);
-	prio	<= regPal_Prio(4 downto 3);
-	
 	--
 	-- Read Bank access control.
 	--
-	process(CurrentX, bankSwap,
-			B2LDataOut, B2HDataOut, 
+	process(loadBank,
+			B0LDataOut, B0HDataOut, 
 			B1LDataOut, B1HDataOut,
-			regStartX)
-		variable xPick	: STD_LOGIC_VECTOR(2 downto 0);
-		variable maxX	: STD_LOGIC_VECTOR(7 downto 0); 
+			reg0Pal_Prio, reg1Pal_Prio,
+			reg0StartX, reg1StartX,
+			CurrentX
+			)
+		variable xPick		: STD_LOGIC_VECTOR(2 downto 0);
+		variable vX		: STD_LOGIC_VECTOR(8 downto 0);
 	begin
 		--
 		-- Extract the correct pixels from the output.
 		--
-		if (bankSwap='1') then
-			pixLo  <= B2LDataOut;
-			pixHi  <= B2HDataOut;
+		if (loadBank='1') then		-- We store in bank 1, so we display bank 0.
+			pixLo	<= B0LDataOut;
+			pixHi	<= B0HDataOut;
+			pal	<= reg0Pal_Prio(2 downto 0);
+			prio	<= reg0Pal_Prio(4 downto 3);
+			vX		:= reg0StartX;
 		else
-			pixLo  <= B1LDataOut;
-			pixHi  <= B1HDataOut;
+			pixLo	<= B1LDataOut;
+			pixHi	<= B1HDataOut;
+			pal	<= reg1Pal_Prio(2 downto 0);
+			prio	<= reg1Pal_Prio(4 downto 3);
+			vX		:= reg1StartX;
 		end if;
 		
 		-- DX <= CurrentX + regStartX; -- TODO : X - regStartX actually., just for compile now.
 		-- TODO make sure that signed X rules works. (and overflow)
-		DX <= CurrentX(7 downto 0) + regStartX(7 downto 0);
+		DX <= ('0' & CurrentX(7 downto 0)) + vX(8 downto 0);
 
 		-- Flip done at loading level.
 		xPick := DX(2 downto 0);
 
-		if ((DX >= "00000000") and (DX < "00001000")) then
+		-- Pixel 0..7 only.
+		if (DX(8 downto 3) = "000000") then
 			case xPick is
-			when "000" => sPixel <= pixHi(7) & pixHi(15) & pixLo(7) & pixLo(15);
-			when "001" => sPixel <= pixHi(6) & pixHi(14) & pixLo(6) & pixLo(14);
-			when "010" => sPixel <= pixHi(5) & pixHi(13) & pixLo(5) & pixLo(13);
-			when "011" => sPixel <= pixHi(4) & pixHi(12) & pixLo(4) & pixLo(12);
-			when "100" => sPixel <= pixHi(3) & pixHi(11) & pixLo(3) & pixLo(11);
-			when "101" => sPixel <= pixHi(2) & pixHi(10) & pixLo(2) & pixLo(10);
-			when "110" => sPixel <= pixHi(1) & pixHi(9) & pixLo(1) & pixLo(9);
-			when others => sPixel<= pixHi(0) & pixHi(8) & pixLo(0) & pixLo(8);
+			when "000" =>	sPixel <= pixHi(8) & pixHi(0) & pixLo(8) & pixLo(0);
+			when "001" =>	sPixel <= pixHi(9) & pixHi(1) & pixLo(9) & pixLo(1);
+			when "010" =>	sPixel <= pixHi(10) & pixHi(2) & pixLo(10) & pixLo(2);
+			when "011" =>	sPixel <= pixHi(11) & pixHi(3) & pixLo(11) & pixLo(3);
+			when "100" =>	sPixel <= pixHi(12) & pixHi(4) & pixLo(12) & pixLo(4);
+			when "101" =>	sPixel <= pixHi(13) & pixHi(5) & pixLo(13) & pixLo(5);
+			when "110" =>	sPixel <= pixHi(14) & pixHi(6) & pixLo(14) & pixLo(6);
+			when others =>	sPixel <= pixHi(15) & pixHi(7) & pixLo(15) & pixLo(7);
 			end case;
 		else
 			sPixel <= "0000";
@@ -140,124 +117,81 @@ begin
 		else
 			isValid <= '1';
 		end if;
+		
+		pixel <= sPixel;
 	end process;
-	pixel <= sPixel;
 	
 	
 	--
 	-- Write bank access control.
 	--
-	process(writeE,bankSwap,SpriteAddrWR,wordIn,DX)
+	process(writeE,hiBPP,loadBank)
 	begin
 		--
 		-- Write signal
 		--
 		if (writeE='1') then
-			if (SpriteAddrWR = '1') then
+			if (hiBPP = '1') then
 				--
 				-- Access High Bank
 				--
+				B0LWEnable <= '0';
 				B1LWEnable <= '0';
-				B2LWEnable <= '0';
 
-				B1HWEnable <= bankSwap;
-				B2HWEnable <= not(bankSwap);
+				B0HWEnable <= not(loadBank);
+				B1HWEnable <= loadBank;
 			else
 				--
 				-- Access Low Bank
 				--
-				B1LWEnable <= bankSwap;
-				B2LWEnable <= not(bankSwap);
+				B0LWEnable <= not(loadBank);
+				B1LWEnable <= loadBank;
 				
+				B0HWEnable <= '0';
 				B1HWEnable <= '0';
-				B2HWEnable <= '0';
 			end if;
 		else
+			B0LWEnable <= '0';
+			B0HWEnable <= '0';
 			B1LWEnable <= '0';
 			B1HWEnable <= '0';
-			B2LWEnable <= '0';
-			B2HWEnable <= '0';
 		end if;
-		
-		--
-		-- Address Signal
-		--
---		if (bankSwap='1') then
---			-- Bank 1 is storage.
---			B1LAddress	<= SpriteAddrWR(2 downto 0);
---			B1HAddress	<= SpriteAddrWR(2 downto 0);
---			
---			-- Bank 2 is pixel reading.
---			B2LAddress	<= DX(5 downto 3);
---			B2HAddress	<= DX(5 downto 3);
---		else
---			-- Bank 1 is pixel reading.
---			B1LAddress	<= DX(5 downto 3);
---			B1HAddress	<= DX(5 downto 3);
---			
---			-- Bank 2 is storage.
---			B2LAddress	<= SpriteAddrWR(2 downto 0);
---			B2HAddress	<= SpriteAddrWR(2 downto 0);			
---		end if;
 	end process;
 
-	-- We do not care about the data,
-	-- as WEnable decides anyway if data is going to be used or not.
---	B1LData		<= wordIn;
---	B1HData		<= wordIn;
---	B2LData		<= wordIn;
---	B2HData		<= wordIn;
-
 	--
-	-- Tile Memory.
+	-- Tile Memory Storage.
 	--
 	process(clock, wordIn)
 	begin
 		if rising_edge(clock) then
+			--
+			-- Store bitmap.
+			--
+			if (B0LWEnable = '1') then
+				B0LDataOut <= wordIn;
+			end if;
+			if (B0HWEnable = '1') then
+				B0HDataOut <= wordIn;
+			end if;
 			if (B1LWEnable = '1') then
 				B1LDataOut <= wordIn;
 			end if;
 			if (B1HWEnable = '1') then
 				B1HDataOut <= wordIn;
 			end if;
-			if (B2LWEnable = '1') then
-				B2LDataOut <= wordIn;
-			end if;
-			if (B2HWEnable = '1') then
-				B2HDataOut <= wordIn;
+			
+			--
+			-- Store Palette & Prio
+			--
+			if (storeAll = '1') then
+				if (loadBank='1') then
+					reg1StartX		<= X;
+					reg1Pal_Prio	<= PalIn_Prio;
+				else
+					reg0StartX		<= X;
+					reg0Pal_Prio	<= PalIn_Prio;
+				end if;
 			end if;
 		end if;
 	end process;
-	
---	instanceBank1Low : SpriteRam port map
---	( 	clock	=> clock,
---		data	=> B1LData,
---		address	=> B1LAddress,
---		we		=> B1LWEnable,
---		q		=> B1LDataOut
---	);
---
---	instanceBank1High : SpriteRam port map
---	( 	clock	=> clock,
---		data	=> B1HData,
---		address	=> B1HAddress,
---		we		=> B1HWEnable,
---		q		=> B1HDataOut
---	);
---
---	instanceBank2Low : SpriteRam port map
---	( 	clock	=> clock,
---		data	=> B2LData,
---		address	=> B2LAddress,
---		we		=> B2LWEnable,
---		q		=> B2LDataOut
---	);
---
---	instanceBank2High : SpriteRam port map
---	( 	clock	=> clock,
---		data	=> B2HData,
---		address	=> B2HAddress,
---		we		=> B2HWEnable,
---		q		=> B2HDataOut
---	);
 end ArchPPU_SpriteUnit;
