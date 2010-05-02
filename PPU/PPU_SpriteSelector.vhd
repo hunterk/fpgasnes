@@ -17,12 +17,13 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity PPU_SpriteSelector is
     Port (
-		Sprites			: in STD_LOGIC_VECTOR (31 downto 0);
+		Sprites			: in STD_LOGIC_VECTOR (33 downto 0);
 
 		Spr1,Spr2,Spr3,Spr4,Spr5,Spr6,Spr7,Spr8,
 		Spr9,Spr10,Spr11,Spr12,Spr13,Spr14,Spr15,Spr16,
 		Spr17,Spr18,Spr19,Spr20,Spr21,Spr22,Spr23,Spr24,
-		Spr25,Spr26,Spr27,Spr28,Spr29,Spr30,Spr31,Spr32
+		Spr25,Spr26,Spr27,Spr28,Spr29,Spr30,Spr31,Spr32,
+		Spr33,Spr34
 						: in STD_LOGIC_VECTOR (8 downto 0);	-- OOPPPxxxx
 
 		OutSpr			: out STD_LOGIC_VECTOR(8 downto 0)
@@ -40,7 +41,8 @@ begin
 		Spr1,Spr2,Spr3,Spr4,Spr5,Spr6,Spr7,Spr8,
 		Spr9,Spr10,Spr11,Spr12,Spr13,Spr14,Spr15,Spr16,
 		Spr17,Spr18,Spr19,Spr20,Spr21,Spr22,Spr23,Spr24,
-		Spr25,Spr26,Spr27,Spr28,Spr29,Spr30,Spr31,Spr32)
+		Spr25,Spr26,Spr27,Spr28,Spr29,Spr30,Spr31,Spr32,
+		Spr33,Spr34)
 	begin
 		if (Sprites(0)='1') then
 		OutSpr <= Spr1;
@@ -138,7 +140,15 @@ begin
 		if (Sprites(31)='1') then
 		OutSpr <= Spr32;
 		else
+		if (Sprites(32)='1') then
+		OutSpr <= Spr33;
+		else
+		if (Sprites(33)='1') then
+		OutSpr <= Spr34;
+		else
 		OutSpr <= "000000000";
+		end if;
+		end if;
 		end if;
 		end if;
 		end if;
