@@ -25,21 +25,21 @@ entity PPU_SpriteSystem is
 		-- ##############################################################
 		loadBank			: in STD_LOGIC;
 		spriteNum			: in STD_LOGIC_VECTOR(5 downto 0);
-		store					: in STD_LOGIC;	-- Store BPP
+		store				: in STD_LOGIC;	-- Store BPP
 		storeHiBPP			: in STD_LOGIC;
 		storePP				: in STD_LOGIC;
 
 		bppData				: in STD_LOGIC_VECTOR(15 downto 0);
-		storeX				: in STD_LOGIC_VECTOR(8 downto 0);
-		storePalPrio			: in STD_LOGIC_VECTOR(4 downto 0);
+		storeX				: in STD_LOGIC_VECTOR( 8 downto 0);
+		storePalPrio		: in STD_LOGIC_VECTOR( 4 downto 0);
 		
 		-- ##############################################################
 		--   Read data for display.
 		-- ##############################################################
-		X						: in STD_LOGIC_VECTOR(7 downto 0);
+		X					: in  STD_LOGIC_VECTOR(7 downto 0);
 		pal					: out STD_LOGIC_VECTOR(2 downto 0);
-		prio					: out STD_LOGIC_VECTOR(1 downto 0);
-		index					: out STD_LOGIC_VECTOR(3 downto 0)
+		prio				: out STD_LOGIC_VECTOR(1 downto 0);
+		index				: out STD_LOGIC_VECTOR(3 downto 0)
 	);
 end PPU_SpriteSystem;
 
