@@ -54,14 +54,15 @@ begin
 			end if;
 			
 			if (line >= Y) and (line < sprH) then
-				inside <= '1'
+				inside <= '1';
 			else
 				maskSprH := "00" & sprH(7 downto 0);
-				if ((sprH >= 256) && (line < maskSprH)) then
+				if ((sprH >= 256) and (line < maskSprH)) then
 					inside <= '1';
 				else
 					inside <= '0';
 				end if;
 			end if;
+		end if;
 	end process;
-end PPU_SpriteInside;
+end APPU_SpriteInside;

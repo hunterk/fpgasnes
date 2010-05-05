@@ -126,9 +126,13 @@ architecture APPU_SpriteLoader of PPU_SpriteLoader is
 	signal SpriteNum		: STD_LOGIC_VECTOR(6 downto 0);
 	
 	signal regR213E_TimeOver,regR213E_RangeOver	: STD_LOGIC;	
-	signal spriteWidthTile,sprTileCounter	: STD_LOGIC_VECTOR(3 downto 0);
+	signal spriteWidthTile,spriteHeighTile,sprTileCounter	: STD_LOGIC_VECTOR(3 downto 0);
 	signal isInside,isTileOutside	: STD_LOGIC;
 	signal bppIn		: STD_LOGIC_VECTOR(15 downto 0);
+	
+	signal sSize		: STD_LOGIC;
+	signal sXStart		: STD_LOGIC_VECTOR(8 downto 0);
+	signal sYStart		: STD_LOGIC_VECTOR(7 downto 0);
 begin
 
 	--##########################################################################
@@ -312,7 +316,7 @@ begin
 	-- Compute Size Width & Height of current sprite based on mode and current size info.
 	--
 	process(sSize, R2101_OAMBaseSize)
-		variable spSize : STD_LOGIC(3 downto 0);
+		variable spSize : STD_LOGIC_VECTOR(3 downto 0);
 	begin
 		spSize := R2101_OAMBaseSize&sSize;
 		case (spSize) is
@@ -364,7 +368,7 @@ begin
 	
 	sprInsideUnit : PPU_SpriteInside
 	Port map (
-		ScrY		=> YNonMosaic,
+		ScrY		=> YNonMosaic(7 downto 0), -- TODO modify with interlace support.
 		Interlace	=> OBJInterlace,
 		
 		X			=> sXStart,
@@ -405,7 +409,7 @@ begin
 	R213E_RangeOver <= regR213E_RangeOver;
 
 	
-	process()
+	process(flipV, flipH, sName, R2101_OAMNameSelect)
 		variable charX	: STD_LOGIC_VECTOR(3 downto 0);
 		variable charY	: STD_LOGIC_VECTOR(3 downto 0);
 	begin
@@ -459,21 +463,29 @@ begin
 			tdAdrOff := "000";
 		end if;
 
-		-- TODO : take care also about isTileOutside.
-		-- if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
-		
-
 		-- 0BB0YY YYXXX XPyyy : WORD adress.
 		-- P=bitmaP : 1:BPP23 / 0:BPP 
 		-- yyy : pixel in tile
 		-- XXXX/YYYY : character.
 		VRAMAdress <= (R2101_OAMNameBase(1 downto 0) & '0' & charY & charX & loadBPP(1) & lineY)
-				 + (tdAdrOff & "000000000000");
+				    + (tdAdrOff & "000000000000");
 		
 		--
 		-- Start X for current tile.
 		--
 		sTileXStart <= sXStart + ("00" & sprTileCounter(2 downto 0) & "000");
+		
+		--
+		-- Check if we need to reject current tile inside the sprite (clipping out of screen)
+		-- if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
+		--
+		sTileXStart7 := sTileXStart + 7;
+		if ((sXStart /= 256) and (sTileXStart >= 256) and (sTileXStart7 < 512)) then
+			isTileOutside = '1';
+		else
+			isTileOutside = '0';
+		end if;
+		
 	end process;
 	
 	
