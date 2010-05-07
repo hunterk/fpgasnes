@@ -19,7 +19,6 @@ entity PPU_Mode7Manager is
     Port ( 	
 		clock         		: in STD_LOGIC;
 		
-		lineStart			: in STD_LOGIC;
 		X_NonMosaic			: in STD_LOGIC_VECTOR(7 downto 0);
 		YMosaic				: in STD_LOGIC_VECTOR(7 downto 0);
 		

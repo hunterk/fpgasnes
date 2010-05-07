@@ -213,7 +213,6 @@ architecture ArchiPPU_System of PPU_System is
 	Port (
 		clock         		: in STD_LOGIC;
 		
-		lineStart			: in STD_LOGIC;
 		X_NonMosaic			: in STD_LOGIC_VECTOR(7 downto 0);
 		YMosaic				: in STD_LOGIC_VECTOR(7 downto 0);
 		
@@ -306,7 +305,6 @@ architecture ArchiPPU_System of PPU_System is
 	component PPU_PixelFetch is
     Port (
 		clock					: in  STD_LOGIC;
-		startLine				: in  STD_LOGIC;
 
 		ScreenY_PostMosaic		: in STD_LOGIC_VECTOR (8 downto 0);
 		ScreenX_NonMosaic		: in STD_LOGIC_VECTOR (8 downto 0);
@@ -457,7 +455,6 @@ architecture ArchiPPU_System of PPU_System is
 	-- todo VRAM signal
 	signal drawPixel : STD_LOGIC;
 	signal visibleX,visibleY : STD_LOGIC;
-	signal startline : STD_LOGIC;
 	
 	signal XMosaicSig,writeCGRAMSig		: STD_LOGIC;
 	signal readWriteAdrCGRAM, readOnlyAdrCGRAM	: STD_LOGIC_VECTOR(7 downto 0);
@@ -843,7 +840,7 @@ begin
 		-- VRAM Arbitration.
 		--
 		-- TODO : now for testing arbitration give higher priority to CPU WRITE and PPU VRAM access.
-		if (visibleX='1' and visibleY='1' and R2100_DisplayDisabled='0' and CPUwrite='0') then
+--		if (visibleX='1' and visibleY='1' and R2100_DisplayDisabled='0' and CPUwrite='0') then
 			--- INSIDE SCREEN     ---
 			--=======================
 			VRAMWrite					<= '0';
@@ -872,51 +869,46 @@ begin
 			sCGRAMDataReadToRegisters	<= "000000000000000";
 			writeDataCGRAM				<= "000000000000000";
 			
-		else
-			--- OUTSIDE OF SCREEN ---
-			--=======================
-			VRAMWrite					<= '0'; -- TODO : rollback later on cpu flags : sVRAMWriteFromRegisters;			-- do write ?
-			VRAMWriteImpair				<= sVRAMWriteLowHightFromRegisters; -- if write, which block ?
-
-			VRAMPairAddress				<= sVRAMAdrFromRegisters;			-- Adress same for both block in read/write.
-			VRAMImpairAddress			<= sVRAMAdrFromRegisters;
-
-			VRAMDataWrite				<= sVRAMDataFromRegisters;			-- Read 16 bit and select correct chunk internally.
-			sVRAMDataToRegisters		<= VRAMDataImpair & VRAMDataPair;
-
-			sVRAMReadDataPairToFetch	<= "00000000";
-			sVRAMReadDataImpairToFetch	<= "00000000";
-			
-			--
-			-- CGRAM Arbitration.
-			--
-			
-			-- CG RAM Unit 1 accessed by CPU as read/write.
-			readWriteAdrCGRAM			<= sCGRAMAdressReadWriteFromRegisters;
-			sPaletteSubReadData			<= "000000000000000";
-			sCGRAMDataReadToRegisters 	<= readDataCGRAM;
-			writeDataCGRAM				<= sCGRAMDataWriteFromRegisters;
-			writeCGRAMSig				<= '0'; -- TODO : rollback later to cpu flags. sCGRAMWriteSigFromRegisters;
-			
-			-- CG RAM Unit 2 always read.
-			readOnlyAdrCGRAM			<= sPaletteMainReadAdr;
-			sPaletteMainReadData		<= readOnlyDataCGRAM;
-						
-		end if;
+--		else
+--			--- OUTSIDE OF SCREEN ---
+--			--=======================
+--			VRAMWrite					<= '0'; -- TODO : rollback later on cpu flags : sVRAMWriteFromRegisters;			-- do write ?
+--			VRAMWriteImpair				<= sVRAMWriteLowHightFromRegisters; -- if write, which block ?
+--
+--			VRAMPairAddress				<= sVRAMAdrFromRegisters;			-- Adress same for both block in read/write.
+--			VRAMImpairAddress			<= sVRAMAdrFromRegisters;
+--
+--			VRAMDataWrite				<= sVRAMDataFromRegisters;			-- Read 16 bit and select correct chunk internally.
+--			sVRAMDataToRegisters		<= VRAMDataImpair & VRAMDataPair;
+--
+--			sVRAMReadDataPairToFetch	<= "00000000";
+--			sVRAMReadDataImpairToFetch	<= "00000000";
+--			
+--			--
+--			-- CGRAM Arbitration.
+--			--
+--			
+--			-- CG RAM Unit 1 accessed by CPU as read/write.
+--			readWriteAdrCGRAM			<= sCGRAMAdressReadWriteFromRegisters;
+--			sPaletteSubReadData			<= "000000000000000";
+--			sCGRAMDataReadToRegisters 	<= readDataCGRAM;
+--			writeDataCGRAM				<= sCGRAMDataWriteFromRegisters;
+--			writeCGRAMSig				<= '0'; -- TODO : rollback later to cpu flags. sCGRAMWriteSigFromRegisters;
+--			
+--			-- CG RAM Unit 2 always read.
+--			readOnlyAdrCGRAM			<= sPaletteMainReadAdr;
+--			sPaletteMainReadData		<= readOnlyDataCGRAM;
+--						
+--		end if;
 		
 		-- Main rendering use second port for palette : always accessible.
 		sPaletteMainReadData	<= readOnlyDataCGRAM;
 		readOnlyAdrCGRAM 		<= sPaletteMainReadAdr;
 		
-		-- Last X Pixel of line AND with valid Y range.
-		if (NormalX >= 267) then
-			startline <= '1';
-		else
-			startline <= '0';
-		end if;
-		
 		-- Within visible range.
-		drawPixel <= visibleX and visibleY;
+		-- drawPixel <= visibleX and visibleY;
+		drawPixel <= '1';
+		-- visibleX and visibleY;
 	end process;
 	
 	--
@@ -927,7 +919,6 @@ begin
 	(
 		clock         		=> clock,
 		
-		lineStart			=> startline,
 		X_NonMosaic			=> NormalX(7 downto 0),
 		YMosaic				=> NormalY(7 downto 0), -- TODO : Not always YMosaic in this case... depends on BG selected also.
 		
@@ -952,7 +943,6 @@ begin
 	instancePixelFetch : PPU_PixelFetch port map
 	(
 		clock					=> clock,
-		startLine				=> startline,
 
 		ScreenY_PostMosaic		=> YMosaic,
 		ScreenX_NonMosaic		=> NormalX,

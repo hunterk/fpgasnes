@@ -186,25 +186,39 @@ begin
 
 	-- 5 Bit --> 8 Bit
 	process(XSnes, regR, regG, regB, showPixel)
+		variable isXM1  : STD_LOGIC;
+		variable isX512 : STD_LOGIC;
+		variable isYM1  : STD_LOGIC;
+		variable isY480 : STD_LOGIC;
+		variable isSX512 : STD_LOGIC;
+		variable isSY480 : STD_LOGIC;
 	begin
-		if (XSnes >= 0) and (XSnes <= 511) then
-			R <= regR & regR(4 downto 2);
-			G <= regG & regG(4 downto 2);
-			B <= regB & regB(4 downto 2);
-		else
-			if (showPixel = '1') then
-				if (XSnes >= 512) then
-					R <= "00000000";
-					G <= "10000000";
-					B <= "00000000";
-				else
-					R <= "10000000";
-					G <= "00000000";
-					B <= "00000000";
-				end if;
+		if (XSnes = 1023) then isXM1  := '1'; else isXM1  := '0'; end if;
+		if (YSnes = 1023) then isYM1  := '1'; else isYM1  := '0'; end if;
+		if (XSnes = 512)  then isX512 := '1'; else isX512 := '0'; end if;
+		if (YSnes = 480)  then isY480 := '1'; else isY480 := '0'; end if;
+
+		if (XSnes >= 512)  then isSX512 := '1'; else isSX512 := '0'; end if;
+		if (YSnes >= 480)  then isSY480 := '1'; else isSY480 := '0'; end if;
+
+		if (isXM1 = '0' and isYM1 = '0' and isX512 = '0' and isY480 = '0') then
+			if (isSX512 = '0' and isSY480 = '0') then
+				R <= regR & regR(4 downto 2);
+				G <= regG & regG(4 downto 2);
+				B <= regB & regB(4 downto 2);
 			else
 				R <= "00000000";
 				G <= "00000000";
+				B <= "00000000";
+			end if;
+		else
+			if (isXM1 = '1' or isX512 = '1') then
+				R <= "11111111";
+				G <= "00000000";
+				B <= "00000000";
+			else
+				R <= "11111111";
+				G <= "11111111";
 				B <= "00000000";
 			end if;
 		end if;
